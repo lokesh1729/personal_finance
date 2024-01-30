@@ -85,7 +85,7 @@ SELECT DISTINCT category FROM walnut_transactions ORDER BY category;
 SELECT DISTINCT category FROM transactions ORDER BY category DESC;
 
 SELECT DISTINCT expense FROM walnut_transactions;
-
+	
 SELECT DISTINCT income FROM walnut_transactions;
 
 SELECT DISTINCT account FROM transactions;
@@ -114,6 +114,8 @@ CREATE TYPE account_type AS ENUM ('IndusInd Credit Card',
 'Slice Credit Card',
 'Citi Bank Account'
 );
+
+ALTER TYPE account_type ADD VALUE 'Kotak Credit Card';
 
 
 ALTER TABLE transactions
@@ -225,6 +227,8 @@ select * from paypal_transactions;
 
 ALTER TABLE payoneer_transactions ALTER COLUMN "INR" TYPE float USING "INR"::float;
 
+ALTER TABLE hdfc_transactions  ALTER COLUMN "Withdrawal Amt." TYPE float USING "Withdrawal Amt."::float;
+
 
 SELECT * FROM transactions WHERE tags ilike '%hair%' ORDER BY txn_date DESC;
 
@@ -236,12 +240,26 @@ SELECT * FROM transactions WHERE (notes ilike '%loan%' or category = 'Loan') and
 
 SELECT * FROM transactions WHERE notes ilike '%satya%';
 
-SELECT * FROM transactions WHERE category = 'Loan';
+SELECT * FROM transactions WHERE category = 'Othres' and (tags ilike '%loan%' or notes ilike '%loan%');
 
 
-SELECT * FROM walnut_transactions WHERE tags ilike '%gold%';
+SELECT * FROM walnut_transactions WHERE tags ilike '%fiver%' or notes ilike '%fiver%';
+
+SELECT * FROM transactions WHERE tags ilike '%fiver%' or notes ilike '%fiver%';
+
+SELECT * from hdfc_credit_card WHERE EXTRACT('Day' FROM "Date") BETWEEN 1 and 12 and EXTRACT('Month' FROM "Date") BETWEEN 1 and 12;
+
+SELECT * FROM paypal_transactions ORDER BY "Date" ASC;
 
 
+update hdfc_transactions set "Withdrawal Amt." = null where "Withdrawal Amt." = '';
 
+ALTER TABLE equitas_transactions  ALTER COLUMN "Date" TYPE DATE using "Date"::DATE;
+
+ALTER TABLE equitas_transactions  ALTER COLUMN "Debit" TYPE DATE using "Debit"::FLOAT;
+
+UPDATE idfc_transactions SET "Balance" = REPLACE("Balance", ',', '');
+
+update idfc_transactions set "Balance" = null where "Balance" = '';
 
 

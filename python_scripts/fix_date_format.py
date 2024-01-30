@@ -6,28 +6,37 @@ import os
 from common import *
 from bank_accounts import *
 from credit_cards import *
+from wallets import *
 
 
 def bank_account_adapter(account_type):
     if account_type == Account.HDFC_BANK_ACCOUNT.name:
-        return hdfc_bank_account_adapter
+        return hdfc_fix_date_format
     elif account_type == Account.KOTAK_BANK_ACCOUNT.name:
-        return kotak_bank_account_adapter
+        return kotak_fix_date_format
+    elif account_type == Account.EQUITAS_BANK_ACCOUNT.name:
+        return equitas_fix_date_format
     elif account_type == Account.SBI_CREDIT_CARD.name:
-        return sbi_credit_card_adapter
+        return sbi_cc_fix_date_format
     elif account_type == Account.HDFC_CREDIT_CARD.name:
-        return hdfc_credit_card_adapter
+        return hdfc_cc_fix_date_format
     elif account_type == Account.HDFC_UPI_CREDIT_CARD.name:
-        return hdfc_upi_credit_card_adapter
+        return hdfc_cc_upi_fix_date_format
     elif account_type == Account.KOTAK_CREDIT_CARD.name:
-        return kotak_credit_card_adapter
+        return kotak_cc_fix_date_format
     elif account_type == Account.ICICI_CREDIT_CARD.name:
-        return icici_credit_card_adapter
+        return icici_cc_fix_date_format
+    elif account_type == Account.PAYTM_WALLET.name:
+        return paytm_fix_date_format
+    elif account_type == Account.IDFC_BANK_ACCOUNT.name:
+        return idfc_fix_date_format
+    elif account_type == Account.FASTAG_WALLET.name:
+        return fastag_fix_date_format
 
 
 def main():
     parser = argparse.ArgumentParser(
-        prog="A program to convert bank statements to the preferred format",
+        prog="A program to fix the date formats",
         description="Takes the type of bank statement and outputs the converted format",
     )
     parser.add_argument(
@@ -45,15 +54,8 @@ def main():
         dest="path",
         required=True,
     )
-    parser.add_argument(
-        "-o",
-        "--output",
-        help="Absolute file path to the output file",
-        dest="output",
-        required=True,
-    )
     args = parser.parse_args()
-    bank_account_adapter(args.type)(args.path, args.output)
+    bank_account_adapter(args.type)(args.path)
 
 
 if __name__ == "__main__":
