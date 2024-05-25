@@ -20,9 +20,9 @@ def sbi_credit_card_adapter(file_name, output):
             if row[columns[4]] != "":
                 result.append(
                     {
-                        "txn_date": datetime.datetime.strptime(
-                            row[columns[0]], "%d %b %y"
-                        ).strftime("%Y-%m-%d"),
+                        "txn_date": convert_date_format(
+                            row[columns[0]], "%d %b %y", "%Y-%m-%d"
+                        ),
                         "account": "SBI Credit Card",
                         "txn_type": "Debit" if row[columns[3]] == "D" else "Credit",
                         "txn_amount": parse_str_to_float(row[columns[2]]),

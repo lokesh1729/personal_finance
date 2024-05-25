@@ -21,7 +21,7 @@ def has_headers(output):
 
 def write_result(output, result):
     headers_exist = has_headers(output)
-    with open(output, "a") as csvfile:
+    with open(output, "a+") as csvfile:
         writer = csv.DictWriter(csvfile, fieldnames=OUTPUT_COLUMNS)
         if not headers_exist:
             writer.writeheader()
@@ -57,3 +57,10 @@ def fix_date_format_core(
         writer.writeheader()
         for each_row in result:
             writer.writerow(each_row)
+
+
+def convert_date_format(value, existing_format, new_format):
+    try:
+        return datetime.datetime.strptime(value, new_format).strftime(new_format)
+    except ValueError:
+        return datetime.datetime.strptime(value, existing_format).strftime(new_format)

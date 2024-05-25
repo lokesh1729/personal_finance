@@ -52,7 +52,7 @@ def kotak_bank_account_adapter(file_name, output):
         "Dr / Cr",
         "Balance",
     ]
-    columns.append(EXTRA_FIELDS)
+    columns.extend(EXTRA_FIELDS)
     result = []
     with open(file_name, "r") as csvfile:
         reader = csv.DictReader(csvfile)
@@ -60,9 +60,9 @@ def kotak_bank_account_adapter(file_name, output):
             if row["Category"] != "":
                 result.append(
                     {
-                        "txn_date": datetime.datetime.strptime(
-                            row[columns[0]], "%B %-d, %Y"
-                        ).strftime("%Y-%m-%d"),
+                        "txn_date": convert_date_format(
+                            row[columns[0]], "%d-%m-%Y", "%Y-%m-%d"
+                        ),
                         "account": "Kotak Bank Account",
                         "txn_type": "Debit" if row[columns[5]] == "DR" else "Credit",
                         "txn_amount": parse_str_to_float(row[columns[4]]),

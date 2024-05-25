@@ -19,7 +19,7 @@ def equitas_bank_account_adapter(file_name, output):
         "Dr / Cr",
         "Balance",
     ]
-    columns.append(EXTRA_FIELDS)
+    columns.extend(EXTRA_FIELDS)
     result = []
     with open(file_name, "r") as csvfile:
         reader = csv.DictReader(csvfile)

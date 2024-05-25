@@ -1,11 +1,17 @@
 import csv
+import os
 import argparse
 
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--file")
-    parser.add_argument("--outfile")
+    parser.add_argument(
+        "-p",
+        "--path",
+        help="Absolute file path to the mutual funds statement.",
+        dest="path",
+        required=True,
+    )
     args = parser.parse_args()
     mapping = {
         "MF_NAME": "SHORT_NAME",
@@ -23,8 +29,10 @@ def main():
         "PRICE": "PURCH_PRICE",
         "BROKER": None,
     }
+    temp_file_name, _ = os.path.splitext(args.path)
+    output_file = "%s_output.csv" % temp_file_name
     data = []
-    with open(args.file, "r") as fp:
+    with open(args.path, "r") as fp:
         for row in csv.DictReader(fp):
             curr_row = {}
             for key, value in mapping.items():
@@ -33,7 +41,7 @@ def main():
                 else:
                     curr_row[key] = row.get(value)
             data.append(curr_row)
-    with open(args.outfile, "w") as fp:
+    with open(output_file, "w") as fp:
         writer = csv.DictWriter(fp, list(mapping.keys()))
         writer.writeheader()
         for row in data:
