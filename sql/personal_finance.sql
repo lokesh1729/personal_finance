@@ -65,6 +65,30 @@ having
 
 
 
+-- mutual funds delete duplicates
+select
+	"MF_NAME",
+	"FOLIO_NUMBER",
+	"TRADE_DATE",
+	"AMOUNT" ,
+	"UNITS" ,
+	"PRICE",
+	string_agg(id::text, ',') as ids
+from
+	mutual_funds mf
+where mf."AMOUNT" > 0
+group by
+	"MF_NAME",
+	"FOLIO_NUMBER",
+	"TRADE_DATE",
+	"AMOUNT" ,
+	"UNITS" ,
+	"PRICE" 
+having
+	count(id) > 1;
+
+
+
 -- find duplicate transactions
 select
 	txn_date,
@@ -215,5 +239,67 @@ INSERT in	TO public.transactions (txn_date,account,txn_type,txn_amount,category,
 	 ('2024-04-05','HDFC Bank Account','Debit',16488.0,'Investments','#PersonalLoan','tataji babai loan - emergency fund / house goal', NOW(), NOW());
 	
 	
+
+
+-- related transactions
+
+	/*
+with myconstants (txn_id) as (
+	values (2801)
+) select * from transactions where (tags ilike '%#' || txn_id) or (id = txn_id) order by txn_date asc;
+*/
+
+select * from transactions where (tags ilike '%#' || 2407 || '%') or (id = 2407) order by txn_date asc;
+
+
+select * from transactions where txn_date between '2024-02-01' and '2024-03-31';
+
+select * from transactions where account = 'Cash' order by txn_date desc;
+
+select * from transactions order by id desc limit 10;
+
+select * from walnut_transactions where tags ilike '%investmentredemption%';
+
+select * from transactions where tags ilike '%investmentredemption%' order by txn_date asc limit 10;
+
+
+select
+	txn_date,
+	account,
+	txn_type,
+	txn_amount,
+	category,
+	tags,
+	notes,
+	string_agg(id::text,
+	',') as ids
+from
+	walnut_transactions wt
+group by
+	txn_date,
+	account,
+	txn_type,
+	txn_amount,
+	category,
+	tags,
+	notes
+having
+	count(*) > 1;
+
+
+
+select distinct category from walnut_transactions wt;
+
+select distinct category from transactions t;
+
+
+
+select * from walnut_transactions wt where wt.tags ~ '[0-9]+';
+
+
+select * from transactions t order by id desc limit 100;
+
+
+
 
 
