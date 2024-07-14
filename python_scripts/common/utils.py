@@ -33,11 +33,10 @@ def parse_str_to_float(in_val):
     return float("".join(in_val.strip().split(",")))
 
 
-def fix_date_format_core(
-    file_path, date_column, input_date_format, output_date_format="%Y-%m-%d"
+def fix_date_format(
+    file_path, date_column, input_date_format, output_date_format="%Y-%m-%d", rewrite=False
 ):
     result = []
-    headers = None
     with open(file_path, "r") as csvfile:
         reader = csv.DictReader(csvfile)
         headers = reader.fieldnames
@@ -50,8 +49,11 @@ def fix_date_format_core(
                     ).strftime(output_date_format),
                 }
             )
-    temp_file_name, _ = os.path.splitext(file_path)
-    output_file = "%s_output.csv" % temp_file_name
+    if rewrite:
+        output_file = file_path
+    else:
+        temp_file_name, _ = os.path.splitext(file_path)
+        output_file = "%s_output.csv" % temp_file_name
     with open(output_file, "w") as csvfile:
         writer = csv.DictWriter(csvfile, fieldnames=headers)
         writer.writeheader()

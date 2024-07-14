@@ -6,7 +6,7 @@ from common import *
 
 
 def idfc_fix_date_format(file_path):
-    fix_date_format_core(file_path, "Transaction Date", "%d-%b-%Y")
+    fix_date_format(file_path, "Transaction Date", "%d-%b-%Y")
     temp_file_name, _ = os.path.splitext(file_path)
     output_file = "%s_output.csv" % temp_file_name
     result = []

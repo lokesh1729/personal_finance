@@ -6,7 +6,7 @@ from common import *
 
 
 def kotak_fix_date_format(file_path):
-    fix_date_format_core(file_path, "Transaction Date", "%d-%m-%Y")
+    fix_date_format(file_path, "Transaction Date", "%d-%m-%Y")
     temp_file_name, _ = os.path.splitext(file_path)
     output_file = "%s_output.csv" % temp_file_name
     new_cols = [

@@ -7,7 +7,7 @@ from common.constants import *
 
 
 def sbi_cc_fix_date_format(file_path):
-    fix_date_format_core(file_path, "Date", "%d %b %y")
+    fix_date_format(file_path, "Date", "%d %b %y")
 
 
 def sbi_credit_card_adapter(file_name, output):

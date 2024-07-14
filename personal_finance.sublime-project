@@ -5,4 +5,9 @@
 			"path": ".",
 		}
 	],
+	"settings": {
+		"jedi.python_virtualenv": "/Users/lokeshsanapalli/projects/personal_finance/venv",
+		"jedi.python_interpreter": "/Users/lokeshsanapalli/projects/personal_finance/venv/bin/python"
+
+	}
 }

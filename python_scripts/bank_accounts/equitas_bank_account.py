@@ -6,7 +6,7 @@ from common import *
 
 
 def equitas_fix_date_format(file_path):
-    fix_date_format_core(file_path, "Date", "%d-%b-%Y")
+    fix_date_format(file_path, "Date", "%d-%b-%Y")
 
 
 def equitas_bank_account_adapter(file_name, output):

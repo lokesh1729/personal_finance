@@ -6,7 +6,7 @@ from common import *
 
 
 def hdfc_fix_date_format(file_path):
-    fix_date_format_core(file_path, "Date", "%d/%m/%y")
+    fix_date_format(file_path, "Date", "%d/%m/%y")
 
 
 def hdfc_bank_account_adapter(file_name, output):

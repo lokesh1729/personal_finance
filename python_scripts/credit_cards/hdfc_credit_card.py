@@ -6,11 +6,11 @@ from common import *
 
 
 def hdfc_cc_fix_date_format(file_path):
-    fix_date_format_core(file_path, "Date", "%d/%m/%Y")
+    fix_date_format(file_path, "Date", "%d/%m/%Y")
 
 
 def hdfc_cc_upi_fix_date_format(file_path):
-    fix_date_format_core(file_path, "Date", "%d/%m/%Y %H:%M:%S")
+    fix_date_format(file_path, "Date", "%d/%m/%Y %H:%M:%S")
 
 
 def hdfc_credit_card_adapter(file_name, output):
