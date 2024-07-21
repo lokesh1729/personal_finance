@@ -5,10 +5,8 @@ import datetime
 from common import *
 
 
-def kotak_fix_date_format(file_path):
-    fix_date_format(file_path, "Transaction Date", "%d-%m-%Y")
-    temp_file_name, _ = os.path.splitext(file_path)
-    output_file = "%s_output.csv" % temp_file_name
+def kotak_fix_date_format(file_path, rewrite=False):
+    output_file = fix_date_format(file_path, "Transaction Date", "%d-%m-%Y", rewrite=rewrite)
     new_cols = [
         "Transaction Date",
         "Value Date",
@@ -43,6 +41,7 @@ def kotak_fix_date_format(file_path):
 
 
 def kotak_bank_account_adapter(file_name, output):
+    kotak_fix_date_format(file_name, rewrite=True)
     columns = [
         "Transaction Date",
         "Value Date",
@@ -52,23 +51,22 @@ def kotak_bank_account_adapter(file_name, output):
         "Dr / Cr",
         "Balance",
     ]
-    columns.extend(EXTRA_FIELDS)
     result = []
     with open(file_name, "r") as csvfile:
         reader = csv.DictReader(csvfile)
         for row in reader:
-            if row["Category"] != "":
-                result.append(
-                    {
-                        "txn_date": convert_date_format(
-                            row[columns[0]], "%d-%m-%Y", "%Y-%m-%d"
-                        ),
-                        "account": "Kotak Bank Account",
-                        "txn_type": "Debit" if row[columns[5]] == "DR" else "Credit",
-                        "txn_amount": parse_str_to_float(row[columns[4]]),
-                        "category": CATEGORY_MAPPING[row[columns[7]]],
-                        "tags": row[columns[8]],
-                        "notes": row[columns[9]],
-                    }
-                )
+            category, tags, notes = auto_detect_category(row[columns[2]])
+            result.append(
+                {
+                    "txn_date": convert_date_format(
+                        row[columns[0]], "%d-%m-%Y", "%Y-%m-%d"
+                    ),
+                    "account": "Kotak Bank Account",
+                    "txn_type": "Debit" if row[columns[5]] == "DR" else "Credit",
+                    "txn_amount": parse_str_to_float(row[columns[4]]),
+                    "category": category,
+                    "tags": tags,
+                    "notes": notes,
+                }
+            )
     write_result(output, result)

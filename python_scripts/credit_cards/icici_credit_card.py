@@ -6,18 +6,19 @@ from common.utils import *
 from common.constants import *
 
 
-def icici_cc_fix_date_format(file_path):
-    fix_date_format(file_path, "Date", "%d/%m/%Y")
+def icici_cc_fix_date_format(file_path, rewrite=False):
+    fix_date_format(file_path, "Date", "%d/%m/%Y", rewrite=rewrite)
 
 
-def icici_credit_card_adapter(file_name, output):
+def icici_credit_card_adapter(filename, out_filename):
+    icici_cc_fix_date_format(filename, rewrite=True)
     columns = ["Date", "Transaction Details", "Amount", "Type"]
-    columns.extend(EXTRA_FIELDS)
     result = []
-    with open(file_name, "r") as csvfile:
+    with open(filename, "r") as csvfile:
         reader = csv.DictReader(csvfile)
         for row in reader:
-            if row[columns[4]] != "" and "cr" not in row[columns[2]].lower():
+            if "cr" not in row[columns[2]].lower():
+                category, tags, notes = auto_detect_category(columns[1])
                 result.append(
                     {
                         "txn_date": datetime.datetime.strptime(
@@ -26,9 +27,9 @@ def icici_credit_card_adapter(file_name, output):
                         "account": "ICICI Credit Card",
                         "txn_type": "Debit",
                         "txn_amount": parse_str_to_float(row[columns[2]]),
-                        "category": CATEGORY_MAPPING[row[columns[4]]],
-                        "tags": row[columns[5]],
-                        "notes": row[columns[6]],
+                        "category": category,
+                        "tags": tags,
+                        "notes": notes,
                     }
                 )
-    write_result(output, result)
+    write_result(out_filename, result)

@@ -6,29 +6,28 @@ from common.utils import *
 from common.constants import *
 
 
-def sbi_cc_fix_date_format(file_path):
-    fix_date_format(file_path, "Date", "%d %b %y")
+def sbi_cc_fix_date_format(file_path, rewrite=False):
+    fix_date_format(file_path, "Date", "%d %b %y", rewrite=rewrite)
 
 
-def sbi_credit_card_adapter(file_name, output):
+def sbi_credit_card_adapter(filename, out_filename):
+    sbi_cc_fix_date_format(filename, rewrite=True)
     columns = ["Date", "Transaction Details", "Amount", "Type"]
-    columns.extend(EXTRA_FIELDS)
     result = []
-    with open(file_name, "r") as csvfile:
+    with open(filename, "r") as csvfile:
         reader = csv.DictReader(csvfile)
         for row in reader:
-            if row[columns[4]] != "":
+            if row[columns[3]] == "D":
+                category, tags, notes = auto_detect_category(row[columns[1]])
                 result.append(
                     {
-                        "txn_date": convert_date_format(
-                            row[columns[0]], "%d %b %y", "%Y-%m-%d"
-                        ),
+                        "txn_date": row[columns[0]],
                         "account": "SBI Credit Card",
-                        "txn_type": "Debit" if row[columns[3]] == "D" else "Credit",
+                        "txn_type": "Debit",
                         "txn_amount": parse_str_to_float(row[columns[2]]),
-                        "category": CATEGORY_MAPPING[row[columns[4]]],
-                        "tags": row[columns[5]],
-                        "notes": row[columns[6]],
+                        "category": category,
+                        "tags": tags,
+                        "notes": notes,
                     }
                 )
-    write_result(output, result)
+    write_result(out_filename, result)
