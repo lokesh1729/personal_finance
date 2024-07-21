@@ -47,7 +47,7 @@ def hdfc_upi_credit_card_adapter(filename, output_filename):
                 category, tags, notes = auto_detect_category(row[columns[1]])
                 result.append(
                     {
-                        "txn_date": convert_date_format(row["Date"], "%d/%m/%Y %H:%M:%S", "%Y-%m-%d"),
+                        "txn_date": convert_date_format(row[columns[0]], "%d/%m/%Y %H:%M:%S", "%Y-%m-%d"),
                         "account": "HDFC Credit Card",
                         "txn_type": "Debit",
                         "txn_amount": parse_str_to_float(row[columns[2]]),

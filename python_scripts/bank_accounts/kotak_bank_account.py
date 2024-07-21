@@ -1,7 +1,3 @@
-import csv
-import os
-import datetime
-
 from common import *
 
 
@@ -20,14 +16,24 @@ def kotak_fix_date_format(file_path, rewrite=False):
     with open(output_file, "r") as csvfile:
         reader = csv.DictReader(csvfile)
         for row in reader:
+            debit = None
+            credit = None
+            if "Dr / Cr" in row:
+                debit = row["Amount"] if row["Dr / Cr"] == "DR" else ""
+                credit = row["Amount"] if row["Dr / Cr"] == "CR" else ""
+            if "Credit" in row and "Debit" in row:
+                debit = row["Debit"]
+                credit = row["Credit"]
+            if credit is None or debit is None:
+                raise ValueError("Invalid data format")
             result.append(
                 {
-                    new_cols[0]: row[new_cols[0]],
+                    new_cols[0]: convert_date_format(row[new_cols[0]], "%d-%m-%Y", "%Y-%m-%d"),
                     new_cols[1]: convert_date_format(row[new_cols[1]], "%d-%m-%Y", "%Y-%m-%d"),
                     new_cols[2]: row[new_cols[2]],
                     new_cols[3]: row[new_cols[3]],
-                    new_cols[4]: row["Amount"] if row["Dr / Cr"] == "DR" else "",
-                    new_cols[5]: row["Amount"] if row["Dr / Cr"] == "CR" else "",
+                    new_cols[4]: debit,
+                    new_cols[5]: credit,
                     new_cols[6]: row[new_cols[6]],
                 }
             )
