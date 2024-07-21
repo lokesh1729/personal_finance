@@ -21,12 +21,10 @@ def hdfc_credit_card_adapter(file_name, output):
         reader = csv.DictReader(csvfile)
         for row in reader:
             if "cr" not in row[columns[3]].lower():
-                category, tags, notes = auto_detect_category(columns[1])
+                category, tags, notes = auto_detect_category(row[columns[1]])
                 result.append(
                     {
-                        "txn_date": datetime.datetime.strptime(
-                            row[columns[0]], "%d/%m/%Y"
-                        ).strftime("%Y-%m-%d"),
+                        "txn_date": convert_date_format(row[columns[0]], "%d/%m/%Y", "%Y-%m-%d"),
                         "account": "HDFC Credit Card",
                         "txn_type": "Debit",
                         "txn_amount": parse_str_to_float(row[columns[2]]),
@@ -46,12 +44,10 @@ def hdfc_upi_credit_card_adapter(filename, output_filename):
         reader = csv.DictReader(csvfile)
         for row in reader:
             if "cr" not in row[columns[3]].lower():
-                category, tags, notes = auto_detect_category(columns[1])
+                category, tags, notes = auto_detect_category(row[columns[1]])
                 result.append(
                     {
-                        "txn_date": datetime.datetime.strptime(
-                            row["Date"], "%d/%m/%Y %H:%M:%S"
-                        ).strftime("%Y-%m-%d"),
+                        "txn_date": convert_date_format(row["Date"], "%d/%m/%Y %H:%M:%S", "%Y-%m-%d"),
                         "account": "HDFC Credit Card",
                         "txn_type": "Debit",
                         "txn_amount": parse_str_to_float(row[columns[2]]),

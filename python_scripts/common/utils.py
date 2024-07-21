@@ -51,6 +51,13 @@ def parse_str_to_float(in_val):
     return float("".join(in_val.strip().split(",")))
 
 
+def convert_date_format(value, existing_format, new_format):
+    try:
+        return datetime.datetime.strptime(value, existing_format).strftime(new_format)
+    except ValueError:
+        return datetime.datetime.strptime(value, new_format).strftime(new_format)
+
+
 def fix_date_format(
     file_path, date_column, input_date_format, output_date_format="%Y-%m-%d", rewrite=False
 ):
@@ -62,9 +69,7 @@ def fix_date_format(
             result.append(
                 {
                     **row,
-                    date_column: datetime.datetime.strptime(
-                        row[date_column].strip(), input_date_format
-                    ).strftime(output_date_format),
+                    date_column: convert_date_format(row[date_column].strip(), input_date_format, output_date_format)
                 }
             )
     if rewrite:
@@ -78,13 +83,6 @@ def fix_date_format(
         for each_row in result:
             writer.writerow(each_row)
     return output_file
-
-
-def convert_date_format(value, existing_format, new_format):
-    try:
-        return datetime.datetime.strptime(value, new_format).strftime(new_format)
-    except ValueError:
-        return datetime.datetime.strptime(value, existing_format).strftime(new_format)
 
 
 def auto_detect_category(description):

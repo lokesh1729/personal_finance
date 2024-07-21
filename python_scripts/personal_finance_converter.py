@@ -50,10 +50,12 @@ def main():
         "--output",
         help="Absolute file path to the output file",
         dest="output",
-        required=True,
+        required=False,
     )
     args = parser.parse_args()
-    bank_account_adapter(args.type)(args.path, args.output)
+    temp_file_name, _ = os.path.splitext(args.path)
+    output_file = "%s_output.csv" % temp_file_name
+    bank_account_adapter(args.type)(args.path, args.output if args.output else output_file)
 
 
 if __name__ == "__main__":

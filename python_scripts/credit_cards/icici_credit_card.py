@@ -21,9 +21,7 @@ def icici_credit_card_adapter(filename, out_filename):
                 category, tags, notes = auto_detect_category(columns[1])
                 result.append(
                     {
-                        "txn_date": datetime.datetime.strptime(
-                            row[columns[0].split()[0]], "%d %b %y"
-                        ).strftime("%Y-%m-%d"),
+                        "txn_date": convert_date_format(row[columns[0].split()[0]], "%d %b %y", "%Y-%m-%d"),
                         "account": "ICICI Credit Card",
                         "txn_type": "Debit",
                         "txn_amount": parse_str_to_float(row[columns[2]]),

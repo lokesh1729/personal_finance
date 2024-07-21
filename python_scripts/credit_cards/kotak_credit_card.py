@@ -20,9 +20,7 @@ def kotak_credit_card_adapter(filename, out_filename):
                 category, tags, notes = auto_detect_category(columns[1])
                 result.append(
                     {
-                        "txn_date": datetime.datetime.strptime(
-                            row[columns[0]], "%d/%m/%Y"
-                        ).strftime("%Y-%m-%d"),
+                        "txn_date": convert_date_format(row[columns[0]], "%d/%m/%Y", "%Y-%m-%d"),
                         "account": "Kotak Credit Card",
                         "txn_type": "Debit",
                         "txn_amount": parse_str_to_float(row[columns[2]]),

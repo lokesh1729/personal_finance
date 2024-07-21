@@ -23,9 +23,7 @@ def kotak_fix_date_format(file_path, rewrite=False):
             result.append(
                 {
                     new_cols[0]: row[new_cols[0]],
-                    new_cols[1]: datetime.datetime.strptime(
-                        row[new_cols[1]].strip(), "%d-%m-%Y"
-                    ).strftime("%Y-%m-%d"),
+                    new_cols[1]: convert_date_format(row[new_cols[1]], "%d-%m-%Y", "%Y-%m-%d"),
                     new_cols[2]: row[new_cols[2]],
                     new_cols[3]: row[new_cols[3]],
                     new_cols[4]: row["Amount"] if row["Dr / Cr"] == "DR" else "",

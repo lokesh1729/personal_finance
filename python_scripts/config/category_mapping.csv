@@ -1,4 +1,24 @@
 keyword,category,tags,notes
+act broadband,Bills,,ACT broadband
+apepdcl,Bills,,APEPDCL Paltheru electricity bill
+bescom,Bills,,BESCOM Paltheru electricity bill
+dreamplug,Bills,,cred
+eggs,Egg & Meat,,
+meat,Egg & Meat,,
+fish,Egg & Meat,,
+chicken,Egg & Meat,,
+mutton,Egg & Meat,,
+licious,Egg & Meat,,
+delightful gourmet,Egg & Meat,#Licious,
+spotify,Entertainment,#spotify #subscription,
+youtube,Entertainment,,
+netflix,Entertainment,#Subscription,
+food,Food & Dining,,
+dining,Food & Dining,,
+zomato,Food & Dining,,
+bundl,Food & Dining,,
+biryani,Food & Dining,,
+biriyani,Food & Dining,,
 veggie,Fruits & Vegetables,,
 veggies,Fruits & Vegetables,,
 vegetable,Fruits & Vegetables,,
@@ -10,64 +30,64 @@ lemons,Fruits & Vegetables,,
 coconut,Fruits & Vegetables,,
 tomato,Fruits & Vegetables,,
 banana,Fruits & Vegetables,,
+petrol,Fuel,,
+fuel,Fuel,,
+gurukrupa,Fuel,,
+petrol,Fuel,,
+iocl,Fuel,,
+groceries,Groceries,,
+grocery,Groceries,,
+bigbasket,Groceries,#Bigbasket,
+innovative retail,Groceries,#Bigbasket,
+geddit,Groceries,#Zepto,
+zepto,Groceries,#Zepto,
+grofers,Groceries,#Blinkit,
+blinkit,Groceries,#Blinkit,
+curd,Groceries,,
+milk,Groceries,,
+hyper market,Groceries,,
+hypermarket,Groceries,,
+health,Health,,
+tablet,Health,,
+medicine,Health,,
+amma,Household,,for amma paltheru
 household,Household,,
 pooja,Household,,
 iron,Household,,
 flower,Household,,
-eggs,Egg & Meat,,
-meat,Egg & Meat,,
-fish,Egg & Meat,,
-chicken,Egg & Meat,,
-mutton,Egg & Meat,,
-licious,Egg & Meat,,
-groceries,Groceries,,
-grocery,Groceries,,
-bigbasket,Groceries,,
-zepto,Groceries,,
-curd,Groceries,,
-milk,Groceries,,
-misc,Misc,,
-food,Food & Dining,,
-dining,Food & Dining,,
-zomato,Food & Dining,,
-bundl,Food & Dining,,
-petrol,Fuel,,
-fuel,Fuel,,
-apple,Productivity,#apple #subscription,
-spotify,Entertainment,#spotify #subscription,
-youtube,Entertainment,,
-health,Health,,
-tablet,Health,,
-medicine,Health,,
-car emi,Loan,#CarLoan,
-term insurance,Investments,,tax saving - term insurance
-plot loan,Investments,#PlotLoan,SBI Plot loan
-health insurance,Investments,#MutualFunds,tax saving - health insurance
-elss mutual funds,Investments,#MutualFunds,tax saving - ELSS mutual funds
+ikea,Household,,
 equity mutual fund,Investments,#MutualFunds,long term - equity mutual funds
 smallcase stocks,Investments,#Stocks,long term - indian stocks
-us stocks,Investments,#USStocks,long term – us stocks
 adhoc stocks,Investments,#Stocks,long term - indian stocks
-amma,Household,,for amma paltheru
+us stocks,Investments,#USStocks,long term – us stocks
 nps trust,Investments,,NPS
-emergency fund,Others,#MonthlyBuffer,short term - monthly buffer & emergency fund
-dhathri ssy,Investments,#SSY,
+plot loan,Investments,#PlotLoan,SBI Plot loan
 stan chart bank,Investments,#EmergencyFund #PersonalLoan,tataji babai loan - emergency fund / house goal
+elss mutual funds,Investments,#MutualFunds,tax saving - ELSS mutual funds
+health insurance,Investments,#MutualFunds,tax saving - health insurance
+term insurance,Investments,,tax saving - term insurance
 vacation goal,Investments,,vacation goal
-whizdm innovations,Salary,,
-whizdm,Salary,,
-house goal,Others,#MonthlyBuffer,
-rent,Rent,,
-salon,Personal Care,,
-netflix,Entertainment,#Subscription,
-apepdcl,Bills,,APEPDCL Paltheru electricity bill
-bescom,Bills,,BESCOM Paltheru electricity bill
-act broadband,Bills,,ACT broadband
+dhathri ssy,Investments,#SSY,
+khazana,Investments,#KhazanaGoldScheme,
+car emi,Loan,#CarLoan,
+kropex auto,Maintenance,,car maintenance
+maintenance,Maintenance,,
+misc,Misc,,
 toy,Misc,,
 toys,Misc,,
 misc,Misc,,
-maintenance,Maintenance,,
-kropex auto,Maintenance,,car maintenance
+emergency fund,Others,#MonthlyBuffer,short term - monthly buffer & emergency fund
+house goal,Others,#MonthlyBuffer,
+salon,Personal Care,,
+hetzner,Productivity,,hetzner
+apple,Productivity,#apple #subscription,
+namecheap,Productivity,,
+zoho,Productivity,,
+rent,Rent,,
+whizdm innovations,Salary,,
+whizdm,Salary,,
+shopping,Shopping,,
+ajio,Shopping,#Ajio,
 auto,Travel,,
 cab,Travel,,
 ola,Travel,,
@@ -75,5 +95,3 @@ rapido,Travel,,
 uber,Travel,,
 irctc,Travel,,
 travel,Travel,,
-hetzner,Productivity,,hetzner
-shopping,Shopping,,
