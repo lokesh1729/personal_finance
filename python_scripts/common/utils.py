@@ -93,7 +93,7 @@ def auto_detect_category(description):
             pattern = re.compile(r'^.*\b(%s)\b.*$' % row["keyword"].lower())
             match = re.match(pattern, description.lower())
             if match is not None and match.group(1):
-                result.append((row["keyword"], row["category"], row["tags"], row["notes"]))
+                result.append((row["keyword"], row["category"], row["tags"], row["notes"] if row["notes"] else match.group(1)))
     if len(result) > 1 and not all(list(map(lambda x: x[1] == result[0][1], result))):
         most_relevant = functools.reduce(lambda acc, curr: acc if len(acc[0]) > len(curr[0]) else curr, result, ('', '', '', ''))
         print("'%s' detected multiple categories='%s' most_relevant=%s" % (description, result, most_relevant))

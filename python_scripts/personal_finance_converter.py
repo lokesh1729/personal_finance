@@ -19,6 +19,8 @@ def bank_account_adapter(account_type):
         return kotak_credit_card_adapter
     elif account_type == Account.ICICI_CREDIT_CARD.name:
         return icici_credit_card_adapter
+    elif account_type == Account.EQUITAS_BANK_ACCOUNT.name:
+        return equitas_bank_account_adapter
 
 
 def main():

@@ -80,7 +80,7 @@ def hdfc_bank_account_adapter(file_name, output):
                 }
             )
     temp_file_name, _ = os.path.splitext(file_name)
-    output_file = "%s_original.csv" % temp_file_name
-    shutil.copyfile(file_name, output_file)
-    write_result(file_name, rows_to_keep, headers=list(columns.values()), append=False)
+    remaining = "%s_remaining.csv" % temp_file_name
+    shutil.copyfile(file_name, remaining)
+    write_result(remaining, rows_to_keep, headers=list(columns.values()), append=False)
     write_result(output, result, append=False)
