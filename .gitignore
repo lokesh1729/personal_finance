@@ -1,5 +1,6 @@
 venv/
 statements/
+sql/dbeaver.txt
 # Created by https://www.toptal.com/developers/gitignore/api/python,sublimetext
 # Edit at https://www.toptal.com/developers/gitignore?templates=python,sublimetext
 

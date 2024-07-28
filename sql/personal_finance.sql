@@ -36,11 +36,6 @@ update kotak_transactions set "Debit" = null where "Debit" = '';
 
 update mutual_funds set "PRICE" = 0 where "PRICE" is null;
 
-
-select version();
-
-
-
 -- find duplicate transactions in a month
 select
 	DATE_TRUNC('month', "txn_date") as txn_month,
@@ -62,7 +57,6 @@ group by
 	category
 having
 	count(id) > 1;
-
 
 
 -- mutual funds delete duplicates
@@ -88,7 +82,6 @@ having
 	count(id) > 1;
 
 
-
 -- find duplicate transactions
 select
 	txn_date,
@@ -111,13 +104,28 @@ having
 	count(id) > 1;
 
 
-
-
-select now();
-
-show timezone;
-
-
+select
+	txn_date,
+	account,
+	txn_type,
+	txn_amount,
+	category,
+	tags,
+	notes,
+	string_agg(id::text,
+	',') as ids
+from
+	walnut_transactions wt
+group by
+	txn_date,
+	account,
+	txn_type,
+	txn_amount,
+	category,
+	tags,
+	notes
+having
+	count(*) > 1;
 
 ALTER TABLE transactions RENAME COLUMN "Date" TO "txn_date";
 
@@ -216,90 +224,3 @@ SELECT unnest(enum_range(NULL::txn_category_type)) as category;
 
 
 ALTER TABLE transactions ALTER COLUMN category TYPE txn_category_type USING category::text::txn_category_type;
-
-
-
--- monthly investments and loans
-
-INSERT in	TO public.transactions (txn_date,account,txn_type,txn_amount,category,tags,notes,created_at,updated_at) values
-	 ('2024-04-01','HDFC Bank Account','Debit',12848.0,'Loan','#CarLoan','', NOW(), NOW()),
-	 ('2024-04-02','HDFC Bank Account','Debit',6000.0,'Investments','','Dhathri SSY', NOW(), NOW()),
-	 ('2024-04-02','HDFC Bank Account','Debit',2650.0,'Investments','#TaxSaving','tax saving - term insurance', NOW(), NOW()),
-	 ('2024-04-02','HDFC Bank Account','Debit',40000.0,'Loan','#PlotLoan #Plot33','SBI Plot loan', NOW(), NOW()),
-	 ('2024-04-02','HDFC Bank Account','Debit',4000.0,'Investments','','tax saving - health insurance', NOW(), NOW()),
-	 ('2024-04-02','HDFC Bank Account','Debit',4000.0,'Investments','#TaxSaving','tax saving - ELSS mutual funds', NOW(), NOW()),
-	 ('2024-04-02','HDFC Bank Account','Debit',34000.0,'Investments','','long term - equity mutual funds', NOW(), NOW()),
-	 ('2024-04-02','Kotak Bank Account','Debit',26000.0,'Investments','#Stocks','long term - indian stocks', NOW(), NOW()),
-	 ('2024-04-02','Kotak Bank Account','Debit',5000.0,'Investments','#USStocks','', NOW(), NOW()),
-	 ('2024-04-02','HDFC Bank Account','Debit',75000.0,'Investments','','short term - house', NOW(), NOW()),
-	 ('2024-04-02','HDFC Bank Account','Debit',4200.0,'Investments','#TaxSaving','NPS', NOW(), NOW()),
-	 ('2024-04-02','HDFC Bank Account','Debit',30000.0,'Investments','','short term - monthly buffer & emergency fund', NOW(), NOW()),
-	 ('2024-04-03','HDFC Bank Account','Debit',33525.0,'Loan','#PlotLoan #Plot34','SBI Plot loan', NOW(), NOW()),
-	 ('2024-04-03','HDFC Bank Account','Debit',10000.0,'Investments','','vacation goal', NOW(), NOW()),
-	 ('2024-04-05','HDFC Bank Account','Debit',16488.0,'Investments','#PersonalLoan','tataji babai loan - emergency fund / house goal', NOW(), NOW());
-	
-	
-
-
--- related transactions
-
-	/*
-with myconstants (txn_id) as (
-	values (2801)
-) select * from transactions where (tags ilike '%#' || txn_id) or (id = txn_id) order by txn_date asc;
-*/
-
-select * from transactions where (tags ilike '%#' || 2407 || '%') or (id = 2407) order by txn_date asc;
-
-
-select * from transactions where txn_date between '2024-02-01' and '2024-03-31';
-
-select * from transactions where account = 'Cash' order by txn_date desc;
-
-select * from transactions order by id desc limit 10;
-
-select * from walnut_transactions where tags ilike '%investmentredemption%';
-
-select * from transactions where tags ilike '%investmentredemption%' order by txn_date asc limit 10;
-
-
-select
-	txn_date,
-	account,
-	txn_type,
-	txn_amount,
-	category,
-	tags,
-	notes,
-	string_agg(id::text,
-	',') as ids
-from
-	walnut_transactions wt
-group by
-	txn_date,
-	account,
-	txn_type,
-	txn_amount,
-	category,
-	tags,
-	notes
-having
-	count(*) > 1;
-
-
-
-select distinct category from walnut_transactions wt;
-
-select distinct category from transactions t;
-
-
-
-select * from walnut_transactions wt where wt.tags ~ '[0-9]+';
-
-
-select * from transactions t order by id desc limit 100;
-
-
-
-
-
