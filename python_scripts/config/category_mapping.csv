@@ -1,13 +1,20 @@
 keyword,category,tags,notes
 act broadband,Bills,,ACT broadband
 apepdcl,Bills,,APEPDCL Paltheru electricity bill
+eastern power,Bills,,APEPDCL Paltheru electricity bill
 bescom,Bills,,BESCOM Paltheru electricity bill
 dreamplug,Bills,,cred
+reliance jio,Bills,,jio recharge
+airtel,Bills,,airtel recharge
+paytm payments utility,Bills,,
+dlocal,Donation,,wikipedia
 eggs,Egg & Meat,,
+egg,Egg & Meat,,
 meat,Egg & Meat,,
 fish,Egg & Meat,,
 chicken,Egg & Meat,,
 mutton,Egg & Meat,,
+prawns,Egg & Meat,,
 licious,Egg & Meat,,
 delightful gourmet,Egg & Meat,#Licious,
 spotify,Entertainment,#spotify #subscription,
@@ -21,6 +28,11 @@ bundl,Food & Dining,,
 biryani,Food & Dining,,
 biriyani,Food & Dining,,
 eatsure,Food & Dining,,
+hospitality,Food & Dining,,
+mc donalds,Food & Dining,,mc donalds
+mcdonalds,Food & Dining,,mc donalds
+tea,Food & Dining,,tea
+estaa sweets,Food & Dining,,Estaa sweets
 veggie,Fruits & Vegetables,,
 veggies,Fruits & Vegetables,,
 vegetable,Fruits & Vegetables,,
@@ -37,6 +49,8 @@ fuel,Fuel,,
 gurukrupa,Fuel,,
 petrol,Fuel,,
 iocl,Fuel,,
+filling,Fuel,,
+fuelling,Fuel,,
 groceries,Groceries,,
 grocery,Groceries,,
 bigbasket,Groceries,#Bigbasket,
@@ -53,6 +67,8 @@ hypermarket,Groceries,,
 health,Health,,
 tablet,Health,,
 medicine,Health,,
+jas dento,Health,,dentist
+ayurveda,Health,,ayurveda
 amma,Household,,for amma paltheru
 household,Household,,
 pooja,Household,,
@@ -83,6 +99,7 @@ misc,Misc,,
 emergency fund,Others,#MonthlyBuffer,short term - monthly buffer & emergency fund
 house goal,Others,#MonthlyBuffer,
 salon,Personal Care,,
+hair cut,Personal Care,,
 hetzner,Productivity,,hetzner
 apple,Productivity,#apple #subscription,
 namecheap,Productivity,,
@@ -92,6 +109,11 @@ whizdm innovations,Salary,,
 whizdm,Salary,,
 shopping,Shopping,,
 ajio,Shopping,#Ajio,
+flipkart,Shopping,#Flipkart,
+meesho,Shopping,#Meesho,
+dress circle,Shopping,,clothes shopping
+reliance retail,Shopping,#Ajio,clothes shopping
+klm fashion,Shopping,,clothes shopping
 auto,Travel,,
 cab,Travel,,
 ola,Travel,,

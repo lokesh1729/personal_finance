@@ -36,16 +36,16 @@ def hdfc_bank_account_adapter(file_name, output):
         reader: csv.DictReader[Dict[object, object]] = csv.DictReader(csvfile)
         for row in reader:
             category, tags, notes = auto_detect_category(row[columns["narration"]])
+            txn_amount = parse_str_to_float(row[columns["withdrawal_amount"]]) if row[columns[
+                "withdrawal_amount"]] != "" else parse_str_to_float(row[columns["deposit_amount"]]) * -1
             if category is not None and category != "":
-                if category not in aggregated_categories:
+                if category not in aggregated_categories or (category in aggregated_categories and txn_amount > 500):
                     result.append(
                         {
                             "txn_date": row[columns["date"]],
                             "account": "HDFC Bank Account",
                             "txn_type": "Debit" if row[columns["withdrawal_amount"]] != "" else "Credit",
-                            "txn_amount": parse_str_to_float(row[columns["withdrawal_amount"]])
-                            if row[columns["withdrawal_amount"]] != ""
-                            else parse_str_to_float(row[columns["deposit_amount"]]) * -1,
+                            "txn_amount": txn_amount,
                             "category": category,
                             "tags": tags,
                             "notes": notes,

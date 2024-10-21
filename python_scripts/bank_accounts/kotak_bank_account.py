@@ -2,7 +2,11 @@ from common import *
 
 
 def kotak_fix_date_format(file_path, rewrite=False):
-    output_file = fix_date_format(file_path, "Transaction Date", "%d-%m-%Y", rewrite=rewrite)
+    output_file = file_path
+    if check_csv_header(file_path, "Transaction Date"):
+        output_file = fix_date_format(
+            file_path, "Transaction Date", "%d-%m-%Y", rewrite=rewrite
+        )
     new_cols = [
         "Transaction Date",
         "Value Date",
@@ -12,6 +16,8 @@ def kotak_fix_date_format(file_path, rewrite=False):
         "Credit",
         "Balance",
     ]
+    if all([check_csv_header(file_path, header) for header in new_cols]):
+        return
     result = []
     with open(output_file, "r") as csvfile:
         reader = csv.DictReader(csvfile)
@@ -28,8 +34,12 @@ def kotak_fix_date_format(file_path, rewrite=False):
                 raise ValueError("Invalid data format")
             result.append(
                 {
-                    new_cols[0]: convert_date_format(row[new_cols[0]], "%d-%m-%Y", "%Y-%m-%d"),
-                    new_cols[1]: convert_date_format(row[new_cols[1]], "%d-%m-%Y", "%Y-%m-%d"),
+                    new_cols[0]: convert_date_format(
+                        row[new_cols[0]], "%d-%m-%Y", "%Y-%m-%d"
+                    ),
+                    new_cols[1]: convert_date_format(
+                        row[new_cols[1]], "%d-%m-%Y", "%Y-%m-%d"
+                    ),
                     new_cols[2]: row[new_cols[2]],
                     new_cols[3]: row[new_cols[3]],
                     new_cols[4]: debit,
@@ -51,8 +61,8 @@ def kotak_bank_account_adapter(file_name, output):
         "Value Date",
         "Description",
         "Chq / Ref No.",
-        "Amount",
-        "Dr / Cr",
+        "Debit",
+        "Credit",
         "Balance",
     ]
     result = []
@@ -66,8 +76,10 @@ def kotak_bank_account_adapter(file_name, output):
                         row[columns[0]], "%d-%m-%Y", "%Y-%m-%d"
                     ),
                     "account": "Kotak Bank Account",
-                    "txn_type": "Debit" if row[columns[5]] == "DR" else "Credit",
-                    "txn_amount": parse_str_to_float(row[columns[4]]),
+                    "txn_type": "Debit" if row[columns[4]] != "" else "Credit",
+                    "txn_amount": parse_str_to_float(row[columns[4]])
+                    if row[columns[4]] != ""
+                    else parse_str_to_float(row[columns[5]]),
                     "category": category,
                     "tags": tags,
                     "notes": notes,

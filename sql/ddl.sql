@@ -265,10 +265,10 @@ CREATE TABLE public.kotak_credit_card (
 	"Spends Area" varchar(50) NULL,
 	"Amount (Rs.)" varchar(50) NOT NULL,
 	id serial4 NOT NULL,
+	"Transaction Type" varchar NULL,
 	CONSTRAINT kotak_credit_card_pk PRIMARY KEY (id)
 );
 CREATE INDEX kotak_credit_card_date_idx ON public.kotak_credit_card USING btree ("Date");
-
 
 -- public.kotak_transactions definition
 
