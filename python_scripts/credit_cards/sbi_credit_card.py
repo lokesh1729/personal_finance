@@ -1,56 +1,35 @@
-import csv
 import math
 import os
+
+import pandas as pd
 
 from common import (
     fix_date_format_df,
     auto_detect_category,
-    write_result,
     parse_str_to_float,
     check_csv_header_df,
     remove_empty_columns,
-    clean_string,
     write_result,
     write_result_df,
+    rename_columns
 )
 
-from fuzzywuzzy import fuzz
 
-
-def rename_columns(df, target_columns):
-    """
-    Reads a CSV file and modifies it based on matching columns.
-
-    Parameters:
-    file_path (str): The path to the CSV file.
-
-    Returns:
-    pd.DataFrame: A modified DataFrame with updated column values.
-    """
-    df = df.set_axis(target_columns, axis=1, copy=False)
-    return df
-
-
-def clean_file(filename):
-    df = remove_empty_columns(filename)
+def clean_file(df):
+    df = remove_empty_columns(df)
     df = rename_columns(df, ["Date", "Transaction Details", "Amount", "Type"])
+    df = clean_rows(df)
     return df
 
 
 def sbi_cc_fix_date_format_df(df):
-    import ipdb
-
-    ipdb.set_trace()
     if check_csv_header_df(df, "Date"):
         df = fix_date_format_df(df, "Date", "%d %b %y")
     return df
 
 
-def sbi_cc_fix_date_format(file_path, rewrite=False):
-    fix_date_format(file_path, "Date", "%d %b %y", rewrite=rewrite)
-
-
 def clean_rows(df):
+    indices_to_drop = []
     for index, row in df.iterrows():
         if isinstance(row["Date"], float) and math.isnan(row["Date"]):
             if (
@@ -60,13 +39,16 @@ def clean_rows(df):
             ):
                 df.at[index, "Date"] = df.at[index - 1, "Date"]
             else:
-                df.drop(index=index, inplace=True)
+                indices_to_drop.append(index)
+    if indices_to_drop:
+        df.drop(indices_to_drop, inplace=True)
     return df
 
 
 def sbi_credit_card_adapter(filename, out_filename):
-    df = clean_file(filename)
-    df = clean_rows(df)
+    # Read the CSV file into a DataFrame
+    df = pd.read_csv(filename)
+    df = clean_file(df)
     df = sbi_cc_fix_date_format_df(df)
     columns = ["Date", "Transaction Details", "Amount", "Type"]
     result = []

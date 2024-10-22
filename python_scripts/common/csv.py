@@ -151,7 +151,7 @@ def check_csv_header_df(df: pd.DataFrame, header_name: str) -> bool:
     return header_name in df.columns
 
 
-def remove_empty_columns(file_path):
+def remove_empty_columns(df):
     """
     Reads a CSV file and removes any empty columns.
 
@@ -161,11 +161,30 @@ def remove_empty_columns(file_path):
     Returns:
     pd.DataFrame: A DataFrame with empty columns removed.
     """
-    # Read the CSV file into a DataFrame
-    df = pd.read_csv(file_path)
-
     # Remove empty columns
     return df.dropna(axis=1, how="all")
+
+
+def remove_empty_rows(df):
+    return df.dropna(how="all")
+
+
+def remove_named_columns(df, columns):
+    return df.drop(columns=columns, inplace=True)
+
+
+def rename_columns(df, target_columns):
+    """
+    Reads a CSV file and modifies it based on matching columns.
+
+    Parameters:
+    df (pd.DataFrame): The path to the CSV file.
+    target_columns: List of columns
+
+    Returns:
+    pd.DataFrame: A modified DataFrame with updated column values.
+    """
+    df.set_axis(target_columns, axis=1, copy=False)
 
 
 def has_headers(output):
