@@ -1,4 +1,3 @@
-import csv
 import math
 import os
 import re
@@ -49,14 +48,26 @@ def remove_mismatch_rows(df, columns):
                 continue
             if each_col not in row:
                 drop_index = True
+                break
             elif each_col == "Date":
                 if row[each_col] == each_col or isinstance(row[each_col], float) and math.isnan(row[each_col]):
                     drop_index = True
+                    break
         if drop_index:
             indices_to_drop.append(index)
     if indices_to_drop:
         df.drop(indices_to_drop, inplace=True)
     return df
+
+def remove_nan_columns(df):
+    # Check if all values in the last column are NaN
+    if df.iloc[:, -1].isna().all():
+        # Swap the last two columns
+        df.columns.values[-1], df.columns.values[-2] = df.columns.values[-2], df.columns.values[-1]
+        # Drop the last column
+        df.drop(columns=df.columns[-1], inplace=True)
+        return df, True
+    return df, False
 
 
 def clean_file(df, columns):
@@ -80,6 +91,10 @@ def hdfc_credit_card_adapter(filename, output):
     # Read the CSV file into a DataFrame
     old_columns = ["Date", "Transaction Description", "Unknown", "Amount (in Rs.)"]
     df = pd.read_csv(filename, header=None, names=old_columns)
+    df, is_modified = remove_nan_columns(df)
+    if is_modified:
+        old_columns = ["Date", "Transaction Description", "Amount (in Rs.)"]
+        df = pd.read_csv(filename, header=None, names=old_columns)
     df = clean_file(df, old_columns)
     df = hdfc_cc_fix_date_format_df(df)
     columns = ["Date", "Description", "Amount", "Debit / Credit"]
