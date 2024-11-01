@@ -15,7 +15,7 @@ from common import (
 )
 
 
-def clean_file(df):
+def clean(df):
     df = remove_empty_columns(df)
     df = rename_columns(df, ["Date", "Transaction Details", "Amount", "Type"])
     df = clean_rows(df)
@@ -48,7 +48,7 @@ def clean_rows(df):
 def sbi_credit_card_adapter(filename, out_filename):
     # Read the CSV file into a DataFrame
     df = pd.read_csv(filename)
-    df = clean_file(df)
+    df = clean(df)
     df = sbi_cc_fix_date_format_df(df)
     columns = ["Date", "Transaction Details", "Amount", "Type"]
     result = []
@@ -60,7 +60,7 @@ def sbi_credit_card_adapter(filename, out_filename):
                     "txn_date": row[columns[0]],
                     "account": "SBI Credit Card",
                     "txn_type": "Debit",
-                    "txn_amount": parse_str_to_float(row[columns[2]]),
+                    "txn_amount": row[columns[2]],
                     "category": category,
                     "tags": tags,
                     "notes": notes,

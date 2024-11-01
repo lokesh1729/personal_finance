@@ -184,7 +184,8 @@ def rename_columns(df, target_columns):
     Returns:
     pd.DataFrame: A modified DataFrame with updated column values.
     """
-    df.set_axis(target_columns, axis=1, copy=False)
+    df = df.set_axis(target_columns, axis=1, copy=False)
+    return df
 
 
 def has_headers(output):
