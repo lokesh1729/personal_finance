@@ -6,7 +6,6 @@ import pandas as pd
 from common import (
     fix_date_format_df,
     auto_detect_category,
-    parse_str_to_float,
     check_csv_header_df,
     remove_empty_columns,
     write_result,

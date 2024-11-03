@@ -38,7 +38,7 @@ def remove_mismatch_rows(df, columns):
                 drop_index = True
                 break
             elif each_col == "Date":
-                if row[each_col] == each_col or isinstance(row[each_col], float) and math.isnan(row[each_col]):
+                if row[each_col] == each_col or (isinstance(row[each_col], float) and math.isnan(row[each_col])):
                     drop_index = True
                     break
         if drop_index:

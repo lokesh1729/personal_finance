@@ -1,8 +1,7 @@
-import os
 import csv
+import datetime
 import functools
 import re
-import datetime
 from typing import Dict
 
 
@@ -63,3 +62,22 @@ def clean_string(input_string: str) -> str:
     cleaned_string = single_space_string.strip()
 
     return cleaned_string
+
+
+def is_valid_date(date_string, fmt):
+    """
+    Check if the given string is a valid date in the format dd/mm/yy.
+
+    Parameters:
+    date_string (str): The date string to check.
+
+    Returns:
+    bool: True if the date string is valid, False otherwise.
+    """
+    try:
+        # Try to parse the date string using strptime
+        datetime.datetime.strptime(date_string, fmt)
+        return True
+    except ValueError:
+        # If ValueError is raised, the date is not valid
+        return False
