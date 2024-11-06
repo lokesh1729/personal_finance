@@ -14,7 +14,7 @@ def auto_detect_category(description):
     with open("config/category_mapping.csv", "r") as fp:
         reader: csv.DictReader[Dict[str, str]] = csv.DictReader(fp)
         for row in reader:
-            pattern = re.compile(r"^.*\b(%s)\b.*$" % row["keyword"].lower())
+            pattern = re.compile(r"^.*(%s).*$" % row["keyword"].lower())
             match = re.match(pattern, description.lower())
             if match is not None and match.group(1):
                 result.append(
@@ -75,6 +75,8 @@ def is_valid_date(date_string, fmt):
     bool: True if the date string is valid, False otherwise.
     """
     try:
+        if isinstance(date_string, datetime.datetime):
+            return True
         # Try to parse the date string using strptime
         datetime.datetime.strptime(date_string, fmt)
         return True

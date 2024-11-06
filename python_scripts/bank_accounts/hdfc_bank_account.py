@@ -1,3 +1,4 @@
+import math
 import os
 
 from common import *
@@ -53,13 +54,16 @@ def hdfc_bank_account_adapter(file_name, output):
     for index, row in df.iterrows():
         category, tags, notes = auto_detect_category(row[columns[1]])
         if category:
-            txn_amount = row[columns[4]] if row[columns[4]] != "" \
-                else row[columns[5]] * -1
+            txn_amount = -1
+            if row[columns[4]] != "" and not math.isnan(row[columns[4]]):
+                txn_amount = row[columns[4]]
+            elif row[columns[5]] != "" and not math.isnan(row[columns[5]]):
+                txn_amount = row[columns[5]] * -1
             result.append(
                 {
                     "txn_date": row[columns[0]],
                     "account": "HDFC Bank Account",
-                    "txn_type": "Debit",
+                    "txn_type": "Debit" if txn_amount > 0 else "Credit",
                     "txn_amount": txn_amount,
                     "category": category,
                     "tags": tags,

@@ -8,6 +8,8 @@ import pandas as pd
 
 def convert_date_format(value, existing_format, new_format):
     try:
+        if isinstance(value, datetime.datetime):
+            return value.strftime(new_format)
         return datetime.datetime.strptime(value, existing_format).strftime(new_format)
     except ValueError:
         return datetime.datetime.strptime(value, new_format).strftime(new_format)
@@ -68,7 +70,7 @@ def fix_date_format_df(
     # Apply the date conversion function to the specified column
     df[date_column] = df[date_column].apply(
         lambda x: convert_date_format(
-            str(x).strip(), input_date_format, output_date_format
+            x, input_date_format, output_date_format
         )
     )
 
