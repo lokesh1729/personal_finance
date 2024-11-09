@@ -4,7 +4,6 @@ import re
 from collections import defaultdict
 from typing import Dict
 
-from bank_accounts.kotak_bank_account import kotak_fix_date_format
 
 
 def auto_investment_fixer(hdfc_filepath, kotak_filepath):
@@ -17,9 +16,8 @@ def auto_investment_fixer(hdfc_filepath, kotak_filepath):
             pattern = re.compile(r'^.*\b(%s)\b.*$' % "NEFT DR-KKBK0008122-LOKESH SANAPALLI".lower())
             match = re.match(pattern, row["Narration"].lower())
             if match is not None and match.group(1):
-                print("Found a match. row='%s'" % row)
+                print("HDFC :: Found a match. row='%s'" % row)
                 hdfc_to_kotak += float(row["Withdrawal Amt."])
-    kotak_fix_date_format(kotak_filepath, rewrite=True)
     with open(kotak_filepath, 'r') as fp:
         reader: csv.DictReader[Dict[str, str]] = csv.DictReader(fp)
         patterns = {
@@ -34,9 +32,12 @@ def auto_investment_fixer(hdfc_filepath, kotak_filepath):
                 pattern = re.compile(r'^.*(%s).*$' % value.lower())
                 match = re.match(pattern, row["Description"].lower())
                 if match is not None and match.group(1):
-                    print("Found a match. row='%s'" % row)
-                    kotak_to_investments += float(row["Debit"])
-                    investments[key] += float(row["Debit"])
+                    if row["Dr / Cr"] == "DR":
+                        print("Kotak :: Found a match. row='%s'" % row)
+                        kotak_to_investments += float(row["Amount"])
+                        investments[key] += float(row["Amount"])
+                    else:
+                        print("Kotak :: Transaction is not Debit. Something wrong. row='%s'" % row)
     print("Total HDFC to kotak=%s" % hdfc_to_kotak)
     print("Total kotak to investments=%s" % kotak_to_investments)
     print("Total diff=%s" % (hdfc_to_kotak - kotak_to_investments))

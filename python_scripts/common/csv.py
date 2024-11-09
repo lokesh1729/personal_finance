@@ -207,7 +207,7 @@ def has_headers(output):
     return has_header
 
 
-def write_result(out_filename, result, headers=None, append=True):
+def write_result(out_filename, result, headers=None, append=False):
     if headers is None:
         output_columns = [
             "txn_date",

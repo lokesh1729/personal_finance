@@ -31,11 +31,30 @@ def clean(df):
         if not valid_date(row["Transaction Date"]) or not valid_number(row["Amount"]):
             indices_to_drop.append(index)
             continue
+        row["Amount"] = parse_str_to_float(row["Amount"])
     if indices_to_drop:
         df.drop(indices_to_drop, inplace=True)
     df = kotak_fix_date_format_df(df)
     return df
 
+
+def clean_columns(df):
+    if 'Debit' not in df.columns:
+        df['Debit'] = None
+    if 'Credit' not in df.columns:
+        df['Credit'] = None
+    # Iterate over the DataFrame rows
+    for index, row in df.iterrows():
+        if row['Dr / Cr'] == 'DR':
+            df.at[index, 'Debit'] = row['Amount']
+        elif row['Dr / Cr'] == 'CR':
+            df.at[index, 'Credit'] = row['Amount']
+        else:
+            print(f"Invalid value present at index {index}: {row['Dr / Cr']}")
+    df.drop(columns=['Dr / Cr'], inplace=True)
+    df.drop(columns=['Amount'], inplace=True)
+    df.drop(columns=['Sl. No.'], inplace=True)
+    return df
 
 
 def kotak_bank_account_adapter(file_name, output):
@@ -56,7 +75,7 @@ def kotak_bank_account_adapter(file_name, output):
                 {
                     "txn_date": row[columns[1]],
                     "account": "Kotak Bank Account",
-                    "txn_type": "Debit",
+                    "txn_type": "Debit" if txn_amount > 0 else "Credit",
                     "txn_amount": txn_amount,
                     "category": category,
                     "tags": tags,
@@ -69,5 +88,6 @@ def kotak_bank_account_adapter(file_name, output):
     temp_file_name, _ = os.path.splitext(file_name)
     modified_filename = "%s_modified.csv" % temp_file_name
     manual_filename = "%s_manual.csv" % temp_file_name
+    df = clean_columns(df)
     write_result_df(modified_filename, df)
     write_result_df(manual_filename, pd.DataFrame(manual_correction))
