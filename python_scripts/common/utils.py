@@ -6,6 +6,8 @@ from typing import Dict
 
 
 def parse_str_to_float(in_val):
+    if isinstance(in_val, float):
+        return in_val
     return float("".join(in_val.strip().split(",")))
 
 
