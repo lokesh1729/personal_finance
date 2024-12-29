@@ -67,12 +67,14 @@ def fix_date_format_df(
     pd.DataFrame: A DataFrame with the updated date formats.
     """
 
+    def handle(val):
+        try:
+            return convert_date_format(val, input_date_format, output_date_format)
+        except Exception:
+            return val
+
     # Apply the date conversion function to the specified column
-    df[date_column] = df[date_column].apply(
-        lambda x: convert_date_format(
-            x, input_date_format, output_date_format
-        )
-    )
+    df[date_column] = df[date_column].apply(handle)
 
     return df
 

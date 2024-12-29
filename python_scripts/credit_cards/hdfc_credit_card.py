@@ -65,27 +65,29 @@ def clean(df, columns):
     pattern = re.compile(r'([0-9]+)')
     for index, row in df.iterrows():
         df.at[index, 'Description'] = row["Transaction Description"]
-        cr_dr = "cr" if "cr" in row["Amount (in Rs.)"].lower() else "dr"
-        match = re.match(pattern, row["Amount (in Rs.)"].replace(",", ""))
-        if match.groups() is not None:
-            amt = match.group(0)
-            df.at[index, 'Amount'] = amt
-            df.at[index, 'Debit / Credit'] = cr_dr
+        if isinstance(row["Amount (in Rs.)"], str):
+            cr_dr = "cr" if "cr" in row["Amount (in Rs.)"].lower() else "dr"
+            match = re.match(pattern, row["Amount (in Rs.)"].replace(",", ""))
+            if match.groups() is not None:
+                amt = match.group(0)
+                df.at[index, 'Amount'] = amt
+                df.at[index, 'Debit / Credit'] = cr_dr
+        else:
+            df.at[index, 'Amount'] = row["Amount (in Rs.)"]
+            df.at[index, 'Debit / Credit'] = "Debit"
     remove_named_columns(df, ["Transaction Description", "Amount (in Rs.)"])
     return df
 
 
 def hdfc_credit_card_adapter(filename, output):
     # Read the CSV file into a DataFrame
-    old_columns = ["Date", "Transaction Description", "Unknown", "Amount (in Rs.)"]
-    df = pd.read_csv(filename, header=None, names=old_columns)
+    df = pd.read_csv(filename, header=None, on_bad_lines='skip')
     df, is_modified = remove_nan_columns(df)
-    if is_modified:
-        old_columns = ["Date", "Transaction Description", "Amount (in Rs.)"]
-        df = pd.read_csv(filename, header=None, names=old_columns)
+    old_columns = ["Date", "Transaction Description", "Amount (in Rs.)"]
+    df.columns = old_columns
     df = clean(df, old_columns)
-    df = hdfc_cc_fix_date_format_df(df)
     columns = ["Date", "Description", "Amount", "Debit / Credit"]
+    df = hdfc_cc_fix_date_format_df(df)
     result = []
     for index, row in df.iterrows():
         if "cr" not in row[columns[3]].lower():
@@ -109,9 +111,11 @@ def hdfc_credit_card_adapter(filename, output):
 
 def hdfc_upi_credit_card_adapter(filename, output):
     # Read the CSV file into a DataFrame
-    old_columns = ["Date", "Transaction Description", "Unknown", "NeuCoins", "Amount (in Rs.)"]
-    df = pd.read_csv(filename, header=None, names=old_columns)
+    old_columns = ["Date", "Transaction Description", "NeuCoins", "Amount (in Rs.)"]
+    df = pd.read_csv(filename, header=None, on_bad_lines="skip")
+    df.columns = old_columns
     df = clean(df, old_columns)
+    df = hdfc_cc_fix_date_format_df(df)
     df = hdfc_cc_upi_fix_date_format_df(df)
     columns = ["Date", "Description", "Amount", "Debit / Credit"]
     result = []

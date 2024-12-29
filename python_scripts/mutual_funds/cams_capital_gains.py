@@ -1,4 +1,4 @@
-from common.csv import rename_csv_columns
+from common.csv_utils import rename_csv_columns
 
 if __name__ == "__main__":
     base_path = '/Users/lokeshsanapalli/projects/personal_finance/statements/mutual funds/capital gains/'

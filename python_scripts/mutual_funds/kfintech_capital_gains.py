@@ -1,4 +1,4 @@
-from common.csv import rename_csv_columns
+from common.csv_utils import rename_csv_columns
 from common.utils import fix_date_format
 
 if __name__ == "__main__":

@@ -1,4 +1,5 @@
 import csv
+import os
 import datetime
 import functools
 import re
@@ -85,3 +86,37 @@ def is_valid_date(date_string, fmt):
     except ValueError:
         # If ValueError is raised, the date is not valid
         return False
+
+
+def convert_date_format(value, existing_format, new_format):
+    try:
+        return datetime.datetime.strptime(value, existing_format).strftime(new_format)
+    except ValueError:
+        return datetime.datetime.strptime(value, new_format).strftime(new_format)
+
+
+def fix_date_format(
+    file_path, date_column, input_date_format, output_date_format="%Y-%m-%d", rewrite=False
+):
+    result = []
+    with open(file_path, "r") as csvfile:
+        reader = csv.DictReader(csvfile)
+        headers = reader.fieldnames
+        for row in reader:
+            result.append(
+                {
+                    **row,
+                    date_column: convert_date_format(row[date_column].strip(), input_date_format, output_date_format)
+                }
+            )
+    if rewrite:
+        output_file = file_path
+    else:
+        temp_file_name, _ = os.path.splitext(file_path)
+        output_file = "%s_output.csv" % temp_file_name
+    with open(output_file, "w") as csvfile:
+        writer = csv.DictWriter(csvfile, fieldnames=headers)
+        writer.writeheader()
+        for each_row in result:
+            writer.writerow(each_row)
+    return output_file

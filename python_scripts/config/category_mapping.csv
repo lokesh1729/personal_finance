@@ -29,7 +29,7 @@ book my show,Entertainment,#BookMyShow,movies
 cinepolis,Entertainment,,cinepolis
 food,Food & Dining,,
 dining,Food & Dining,,
-zomato,Food & Dining,,
+zomato,Food & Dining,#Zomato,
 swiggy,Food & Dining,,
 bundl,Food & Dining,,
 biryani,Food & Dining,,
@@ -80,7 +80,7 @@ jas dento,Health,,dentist
 ayurveda,Health,,ayurveda
 amma,Household,,for amma paltheru
 household,Household,,
-pooja,Household,,
+pooja,Household,#pooja,
 iron,Household,,
 flower,Household,,
 ikea,Household,,

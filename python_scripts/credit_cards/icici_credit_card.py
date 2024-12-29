@@ -4,6 +4,7 @@ import pandas as pd
 
 from common import remove_empty_rows, remove_empty_columns, parse_str_to_float, check_csv_header_df, fix_date_format_df, \
     auto_detect_category, write_result, write_result_df
+from common.pdf import unlock_pdf, extract_tables_from_pdf
 
 
 def icici_cc_fix_date_format_df(df):
@@ -33,7 +34,7 @@ def safe_at(df, row_label, col_label):
         return None  # or any default value you prefer
 
 
-def icici_credit_card_adapter(filename, out_filename):
+def icici_credit_card_adapter_old(filename, out_filename):
     df = pd.read_csv(filename, header=None)
     df = clean(df)
     columns = ["Date", "Sr.No.", "Transaction Details", "Reward Points", "Intl Amount", "Amount", "Type"]
@@ -41,7 +42,7 @@ def icici_credit_card_adapter(filename, out_filename):
             and safe_at(df, 0, 2) and safe_at(df, 0, 2) == 'Transaction Details'):
         new_data = []
         for index, row in df.iterrows():
-            if pd.isna(row[2]) and pd.isna(row[5]):
+            if row[2] == "Transaction Details" or row[5] == "Amount (in`)" or pd.isna(row[0]) or pd.isna(row[2]) or pd.isna(row[5]):
                 continue
             try:
                 new_data.append({
@@ -80,7 +81,7 @@ def icici_credit_card_adapter(filename, out_filename):
             result.append(
                 {
                     "txn_date": row["Date"],
-                    "account": "HDFC Credit Card",
+                    "account": "ICICI Credit Card",
                     "txn_type": "Debit",
                     "txn_amount": row["Amount"],
                     "category": category,
@@ -92,3 +93,20 @@ def icici_credit_card_adapter(filename, out_filename):
     temp_file_name, _ = os.path.splitext(filename)
     modified_filename = "%s_modified.csv" % temp_file_name
     write_result_df(modified_filename, df)
+
+
+def icici_credit_card_adapter(filename, out_filename):
+    unlock_pdf(filename, "ICICI_CREDIT_CARD_PASSWORD")
+    for each_filename in extract_tables_from_pdf(filename, [365, 202, 488, 561], "stream"):
+        try:
+            df = pd.read_csv(each_filename, header=None)
+            if df.iloc[0].equals(pd.Series(["0", 1.0, "2", "3", "4", "5"])):
+                # Drop the first row
+                df = df.drop(0)
+                df.to_csv(each_filename, index=False, header=False)
+                icici_credit_card_adapter_old(each_filename, out_filename)
+        except Exception as exc:
+            print(f"Exception in processing file {each_filename}. Skipping... Exception={exc}")
+
+if __name__ == "__main__":
+    icici_credit_card_adapter("/Users/lokeshsanapalli/projects/personal_finance/statements/credit_cards/oct_2024/icici_oct_2024.pdf", "/Users/lokeshsanapalli/projects/personal_finance/statements/credit_cards/oct_2024/icici_oct_2024_output.csv")

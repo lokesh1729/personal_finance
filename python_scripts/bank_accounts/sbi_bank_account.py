@@ -1,10 +1,11 @@
 import os
 import csv
+
+import pandas as pd
 import xlrd
 import openpyxl
 import argparse
 import magic
-import re
 
 
 def is_valid_date(date_string):
@@ -15,8 +16,8 @@ def is_valid_date(date_string):
 def is_valid_number(value):
     # Check if the value is a number or empty
     try:
-        if value == "" or value is None:
-            return True
+        if value == "" or value is None or pd.isna(value):
+            return False
         float(value)
         return True
     except ValueError:
