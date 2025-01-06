@@ -13,10 +13,6 @@ def hdfc_fix_date_format_df(df):
 def is_na_or_empty(val):
     return pd.isna(val) or val is None or val == ''
 
-
-def valid_date(val):
-    return is_valid_date(val, "%d/%m/%y")
-
 def valid_number(val):
     return isinstance(val, int) or isinstance(val, float) or isinstance(parse_str_to_float(val), float)
 
@@ -28,7 +24,7 @@ def clean(df):
                 and is_na_or_empty("Deposit Amt."))):
             indices_to_drop.append(index)
             continue
-        if not valid_date(row["Date"]) or (not valid_number(row["Withdrawal Amt."]) and not valid_number(row["Deposit Amt."])):
+        if not is_valid_date(row["Date"], "%d/%m/%y") or (not valid_number(row["Withdrawal Amt."]) and not valid_number(row["Deposit Amt."])):
             indices_to_drop.append(index)
             continue
     if indices_to_drop:

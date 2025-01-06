@@ -11,6 +11,8 @@ def bank_account_adapter(account_type):
         return kotak_bank_account_adapter
     elif account_type == Account.SBI_CREDIT_CARD.name:
         return sbi_credit_card_adapter
+    elif account_type == Account.SBI2_CREDIT_CARD.name:
+        return sbi2_credit_card_adapter
     elif account_type == Account.HDFC_CREDIT_CARD.name:
         return hdfc_credit_card_adapter
     elif account_type == Account.HDFC_UPI_CREDIT_CARD.name:

@@ -14,3 +14,4 @@ class Account(Enum):
     PAYTM_WALLET = 9
     IDFC_BANK_ACCOUNT = 10
     FASTAG_WALLET = 11
+    SBI2_CREDIT_CARD = 12

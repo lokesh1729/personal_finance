@@ -12,7 +12,7 @@ from common import (
     fix_date_format_df,
     remove_empty_columns,
     remove_empty_rows,
-    remove_named_columns, write_result_df,
+    remove_named_columns, write_result_df, is_valid_date,
 )
 from common.pdf import unlock_pdf, extract_tables_from_pdf
 
@@ -40,7 +40,11 @@ def remove_mismatch_rows(df, columns):
                 drop_index = True
                 break
             elif each_col == "Date":
-                if row[each_col] == each_col or (isinstance(row[each_col], float) and math.isnan(row[each_col])):
+                if (row[each_col] == each_col or (isinstance(row[each_col], float) and math.isnan(row[each_col]))
+                        or
+                        not (is_valid_date(row[each_col], "%d/%m/%Y")
+                             or is_valid_date(row[each_col], "%d/%m/%Y %H:%M:%S"))
+                ):
                     drop_index = True
                     break
         if drop_index:
@@ -64,7 +68,7 @@ def clean(df, columns):
     df = remove_mismatch_rows(df, columns)
     df = remove_empty_columns(df)
     df = remove_empty_rows(df)
-    pattern = re.compile(r'([0-9]+)')
+    pattern = re.compile(r'\b\d+(\.\d{1,2})?\b')
     for index, row in df.iterrows():
         df.at[index, 'Description'] = row["Transaction Description"]
         if isinstance(row["Amount (in Rs.)"], str):
@@ -72,10 +76,10 @@ def clean(df, columns):
             match = re.match(pattern, row["Amount (in Rs.)"].replace(",", ""))
             if match.groups() is not None:
                 amt = match.group(0)
-                df.at[index, 'Amount'] = amt
+                df.at[index, 'Amount'] = float(amt)
                 df.at[index, 'Debit / Credit'] = cr_dr
         else:
-            df.at[index, 'Amount'] = row["Amount (in Rs.)"]
+            df.at[index, 'Amount'] = float(row["Amount (in Rs.)"])
             df.at[index, 'Debit / Credit'] = "Debit"
     remove_named_columns(df, ["Transaction Description", "Amount (in Rs.)"])
     return df
@@ -128,7 +132,7 @@ def hdfc_credit_card_adapter(filename, output):
             print(f"Exception in processing file {each_filename}. Skipping... Exception={traceback.format_exc()}")
 
 
-def hdfc_upi_credit_card_adapter(filename, output):
+def hdfc_upi_credit_card_adapter_old(filename, output):
     # Read the CSV file into a DataFrame
     old_columns = ["Date", "Transaction Description", "NeuCoins", "Amount (in Rs.)"]
     df = pd.read_csv(filename, header=None, on_bad_lines="skip")
@@ -156,3 +160,20 @@ def hdfc_upi_credit_card_adapter(filename, output):
     temp_file_name, _ = os.path.splitext(filename)
     modified_filename = "%s_modified.csv" % temp_file_name
     write_result_df(modified_filename, df)
+
+
+def hdfc_upi_credit_card_adapter(filename, output):
+    unlock_pdf(filename, "HDFC_CREDIT_CARD_PASSWORD")
+    for each_filename in extract_tables_from_pdf(filename, [413, 16, 670, 594], [413, 16, 670, 594], "lattice"):
+        try:
+            df = pd.read_csv(each_filename, header=None)
+            if df.iloc[0].equals(pd.Series(["0", "1", 2.00000, "3", 4.00000, 5.00000])):
+                # Drop the first row
+                df = df.drop(0)
+                df = remove_empty_columns(df)
+                df.to_csv(each_filename, index=False, header=False)
+                temp_file_name, _ = os.path.splitext(each_filename)
+                output_file = "%s_output.csv" % temp_file_name
+                hdfc_upi_credit_card_adapter_old(each_filename, output_file)
+        except Exception:
+            print(f"Exception in processing file {each_filename}. Skipping... Exception={traceback.format_exc()}")

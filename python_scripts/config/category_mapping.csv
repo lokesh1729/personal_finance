@@ -41,6 +41,7 @@ mcdonalds,Food & Dining,,mc donalds
 tea,Food & Dining,,tea
 estaa sweets,Food & Dining,,Estaa sweets
 meghana foods,Food & Dining,,meghana foods
+restaurant,Food & Dining,,
 veggie,Fruits & Vegetables,,
 veggies,Fruits & Vegetables,,
 vegetable,Fruits & Vegetables,,
@@ -73,6 +74,7 @@ milk,Groceries,,
 hyper market,Groceries,,
 hypermarket,Groceries,,
 InnovativeRetailConceptBangalore,Groceries,#Bigbasket,
+dmart,Groceries,#dmart,
 health,Health,,
 tablet,Health,,
 medicine,Health,,
@@ -132,3 +134,4 @@ rapido,Travel,,
 uber,Travel,,
 irctc,Travel,,
 travel,Travel,,
+indigo,Travel,,

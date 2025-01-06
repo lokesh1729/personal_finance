@@ -1,5 +1,6 @@
 import math
 import os
+import traceback
 
 import pandas as pd
 
@@ -12,6 +13,7 @@ from common import (
     write_result_df,
     rename_columns
 )
+from common.pdf import unlock_pdf, extract_tables_from_pdf
 
 
 def clean(df):
@@ -44,12 +46,13 @@ def clean_rows(df):
     return df
 
 
-def sbi_credit_card_adapter(filename, out_filename):
+def sbi_credit_card_adapter_old(filename, out_filename):
     # Read the CSV file into a DataFrame
-    df = pd.read_csv(filename)
+    columns = ["Date", "Transaction Details", "Amount", "Type"]
+    df = pd.read_csv(filename, header=None, on_bad_lines="skip")
+    df.columns = columns
     df = clean(df)
     df = sbi_cc_fix_date_format_df(df)
-    columns = ["Date", "Transaction Details", "Amount", "Type"]
     result = []
     for index, row in df.iterrows():
         if row[columns[3]] == "D":
@@ -69,3 +72,37 @@ def sbi_credit_card_adapter(filename, out_filename):
     temp_file_name, _ = os.path.splitext(filename)
     modified_filename = "%s_modified.csv" % temp_file_name
     write_result_df(modified_filename, df)
+
+
+def sbi_credit_card_adapter(filename, output):
+    unlock_pdf(filename, "SBI_CREDIT_CARD_PASSWORD")
+    for each_filename in extract_tables_from_pdf(filename, [517, 16, 833, 427], [517, 16, 833, 427], "stream"):
+        try:
+            df = pd.read_csv(each_filename, header=None)
+            if df.iloc[0].equals(pd.Series(["0", "1", "2", 3.00000, "4"])):
+                # Drop the first row
+                df = df.drop(0)
+                df = remove_empty_columns(df)
+                df.to_csv(each_filename, index=False, header=False)
+                temp_file_name, _ = os.path.splitext(each_filename)
+                output_file = "%s_output.csv" % temp_file_name
+                sbi_credit_card_adapter_old(each_filename, output_file)
+        except Exception:
+            print(f"Exception in processing file {each_filename}. Skipping... Exception={traceback.format_exc()}")
+
+
+def sbi2_credit_card_adapter(filename, output):
+    unlock_pdf(filename, "SBI2_CREDIT_CARD_PASSWORD")
+    for each_filename in extract_tables_from_pdf(filename, [430, 16, 669, 428], [430, 16, 669, 428], "stream"):
+        try:
+            df = pd.read_csv(each_filename, header=None)
+            if df.iloc[0].equals(pd.Series(["0", "1", "2", "3", "4"])):
+                # Drop the first row
+                df = df.drop(0)
+                df = remove_empty_columns(df)
+                df.to_csv(each_filename, index=False, header=False)
+                temp_file_name, _ = os.path.splitext(each_filename)
+                output_file = "%s_output.csv" % temp_file_name
+                sbi_credit_card_adapter_old(each_filename, output_file)
+        except Exception:
+            print(f"Exception in processing file {each_filename}. Skipping... Exception={traceback.format_exc()}")
