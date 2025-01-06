@@ -41,13 +41,14 @@ def unlock_pdf(pdf_path, env_var_name):
     print(f"Successfully unlocked and saved the PDF at: {pdf_path}")
 
 
-def extract_tables_from_pdf(pdf_path, coords, extraction_method):
+def extract_tables_from_pdf(pdf_path, coords, coords2, extraction_method):
     """
     Extracts tables from a PDF file within given coordinates using Tabula and saves them as CSV files.
 
     Parameters:
         pdf_path (str): The file path of the PDF.
-        coords (list): A list of coordinates [top, left, bottom, right] for the table.
+        coords (list): Coordinates [top, left, bottom, right] for the table on the first page.
+        coords2 (list): Coordinates [top, left, bottom, right] for the table on subsequent pages.
         extraction_method (str): The method for extraction ("lattice" or "stream").
 
     Returns:
@@ -56,16 +57,23 @@ def extract_tables_from_pdf(pdf_path, coords, extraction_method):
     if not os.path.exists(pdf_path):
         raise FileNotFoundError(f"PDF file not found at {pdf_path}")
 
+    # Get the total number of pages in the PDF
+    pdf_reader = PdfReader(pdf_path)
+    total_pages = len(pdf_reader.pages)
+
     extracted_tables = {}
     base_name = os.path.splitext(os.path.basename(pdf_path))[0]
     output_dir = os.path.dirname(pdf_path)
     result = []
 
     # Iterate through each page of the PDF
-    for page_number in range(1, len(tabula.read_pdf(pdf_path, pages="all", silent=True)) + 1):
+    for page_number in range(1, total_pages + 1):
+        # Use coords for the first page and coords2 for subsequent pages
+        current_coords = coords if page_number == 1 else coords2
+
         tables = tabula.read_pdf(
             pdf_path,
-            area=coords,
+            area=current_coords,
             pages=page_number,
             multiple_tables=False,
             lattice=(extraction_method == "lattice"),
@@ -86,7 +94,9 @@ def extract_tables_from_pdf(pdf_path, coords, extraction_method):
         print("No tables found within the specified coordinates.")
     else:
         print(f"Extracted tables from {len(extracted_tables)} pages and saved them as CSV files.")
+
     return result
+
 
 if __name__ == "__main__":
     unlock_pdf("/Users/lokeshsanapalli/projects/personal_finance/statements/credit_cards/oct_2024/icici_oct_2024.pdf", "ICICI_CREDIT_CARD_PASSWORD")

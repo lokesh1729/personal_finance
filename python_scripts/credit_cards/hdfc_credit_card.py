@@ -1,6 +1,7 @@
 import math
 import os
 import re
+import traceback
 import pandas as pd
 
 from common import (
@@ -13,6 +14,7 @@ from common import (
     remove_empty_rows,
     remove_named_columns, write_result_df,
 )
+from common.pdf import unlock_pdf, extract_tables_from_pdf
 
 
 def hdfc_cc_fix_date_format_df(df):
@@ -79,7 +81,7 @@ def clean(df, columns):
     return df
 
 
-def hdfc_credit_card_adapter(filename, output):
+def hdfc_credit_card_adapter_old(filename, output):
     # Read the CSV file into a DataFrame
     df = pd.read_csv(filename, header=None, on_bad_lines='skip')
     df, is_modified = remove_nan_columns(df)
@@ -107,6 +109,23 @@ def hdfc_credit_card_adapter(filename, output):
     temp_file_name, _ = os.path.splitext(filename)
     modified_filename = "%s_modified.csv" % temp_file_name
     write_result_df(modified_filename, df)
+
+
+def hdfc_credit_card_adapter(filename, output):
+    unlock_pdf(filename, "HDFC_CREDIT_CARD_PASSWORD")
+    for each_filename in extract_tables_from_pdf(filename, [413, 16, 670, 594], [413, 16, 670, 594], "lattice"):
+        try:
+            df = pd.read_csv(each_filename, header=None)
+            if df.iloc[0].equals(pd.Series(["0", "1", "2", 3.00000, 4.00000])):
+                # Drop the first row
+                df = df.drop(0)
+                df = remove_empty_columns(df)
+                df.to_csv(each_filename, index=False, header=False)
+                temp_file_name, _ = os.path.splitext(each_filename)
+                output_file = "%s_output.csv" % temp_file_name
+                hdfc_credit_card_adapter_old(each_filename, output_file)
+        except Exception:
+            print(f"Exception in processing file {each_filename}. Skipping... Exception={traceback.format_exc()}")
 
 
 def hdfc_upi_credit_card_adapter(filename, output):

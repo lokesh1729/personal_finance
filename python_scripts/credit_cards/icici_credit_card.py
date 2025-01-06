@@ -1,4 +1,5 @@
 import os
+import traceback
 
 import pandas as pd
 
@@ -97,16 +98,19 @@ def icici_credit_card_adapter_old(filename, out_filename):
 
 def icici_credit_card_adapter(filename, out_filename):
     unlock_pdf(filename, "ICICI_CREDIT_CARD_PASSWORD")
-    for each_filename in extract_tables_from_pdf(filename, [365, 202, 488, 561], "stream"):
+    for each_filename in extract_tables_from_pdf(filename, [365, 202, 488, 561], [365, 202, 488, 561], "stream"):
         try:
             df = pd.read_csv(each_filename, header=None)
             if df.iloc[0].equals(pd.Series(["0", 1.0, "2", "3", "4", "5"])):
                 # Drop the first row
                 df = df.drop(0)
+                df = remove_empty_columns(df)
                 df.to_csv(each_filename, index=False, header=False)
-                icici_credit_card_adapter_old(each_filename, out_filename)
+                temp_file_name, _ = os.path.splitext(each_filename)
+                output_file = "%s_output.csv" % temp_file_name
+                icici_credit_card_adapter_old(each_filename, output_file)
         except Exception as exc:
-            print(f"Exception in processing file {each_filename}. Skipping... Exception={exc}")
+            print(f"Exception in processing file {each_filename}. Skipping... Exception={traceback.format_exc()}")
 
 if __name__ == "__main__":
     icici_credit_card_adapter("/Users/lokeshsanapalli/projects/personal_finance/statements/credit_cards/oct_2024/icici_oct_2024.pdf", "/Users/lokeshsanapalli/projects/personal_finance/statements/credit_cards/oct_2024/icici_oct_2024_output.csv")
