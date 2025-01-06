@@ -40,20 +40,20 @@ def icici_credit_card_adapter_old(filename, out_filename):
     df = clean(df)
     columns = ["Date", "Sr.No.", "Transaction Details", "Reward Points", "Intl Amount", "Amount", "Type"]
     if (safe_at(df, 0, 0) and safe_at(df, 0, 0) == 'Date SerNo.'
-            and safe_at(df, 0, 2) and safe_at(df, 0, 2) == 'Transaction Details'):
+            and safe_at(df, 0, 1) and safe_at(df, 0, 1) == 'Transaction Details'):
         new_data = []
         for index, row in df.iterrows():
-            if row[2] == "Transaction Details" or row[5] == "Amount (in`)" or pd.isna(row[0]) or pd.isna(row[2]) or pd.isna(row[5]):
+            if row[1] == "Transaction Details" or row[4] == "Amount (in`)" or pd.isna(row[0]) or pd.isna(row[1]) or pd.isna(row[4]):
                 continue
             try:
                 new_data.append({
                     columns[0]: row[0].split(" ")[0],
                     columns[1]: row[0].split(" ")[1],
-                    columns[2]: row[2],
-                    columns[3]: row[3],
-                    columns[4]: 0 if pd.isna(row[4]) else row[4],
-                    columns[5]: parse_str_to_float(row[5].lower().split("cr")[0]),
-                    columns[6]: "Credit" if "cr" in row[5].lower() else "Debit",
+                    columns[2]: row[1],
+                    columns[3]: row[2],
+                    columns[4]: 0 if pd.isna(row[3]) else row[3],
+                    columns[5]: parse_str_to_float(row[4] if isinstance(row[4], float) else row[4].lower().split("cr")[0]),
+                    columns[6]: "Credit" if isinstance(row[4], str) and "cr" in row[4].lower() else "Debit",
                 })
             except (ValueError, KeyError):
                 pass
@@ -68,8 +68,8 @@ def icici_credit_card_adapter_old(filename, out_filename):
                     columns[2]: row[2],
                     columns[3]: row[3],
                     columns[4]: "",
-                    columns[5]: parse_str_to_float(row[4].lower().split("cr")[0]),
-                    columns[6]: "Credit" if "cr" in row[4].lower() else "Debit",
+                    columns[5]: parse_str_to_float(row[4] if isinstance(row[4], float) else row[4].lower().split("cr")[0]),
+                    columns[6]: "Credit" if isinstance(row[4], str) and "cr" in row[4].lower() else "Debit",
                 })
             except (ValueError, KeyError):
                 pass
@@ -101,7 +101,7 @@ def icici_credit_card_adapter(filename, out_filename):
     for each_filename in extract_tables_from_pdf(filename, [365, 202, 488, 561], [365, 202, 488, 561], "stream"):
         try:
             df = pd.read_csv(each_filename, header=None)
-            if df.iloc[0].equals(pd.Series(["0", 1.0, "2", "3", "4", "5"])):
+            if df.iloc[0].equals(pd.Series(["0", 1.00000, "2", "3", "4", "5"])):
                 # Drop the first row
                 df = df.drop(0)
                 df = remove_empty_columns(df)
