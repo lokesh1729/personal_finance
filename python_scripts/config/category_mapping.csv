@@ -1,4 +1,6 @@
 keyword,category,tags,notes
+NWD-526099XXXXXX1943,ATM Withdrawal,,
+ATW-526099XXXXXX1943,ATM Withdrawal,,
 act broadband,Bills,,ACT broadband
 apepdcl,Bills,,APEPDCL Paltheru electricity bill
 eastern power,Bills,,APEPDCL Paltheru electricity bill
@@ -27,6 +29,7 @@ pvrcinemas,Entertainment,,movies
 bookmyshow,Entertainment,#BookMyShow,movies
 book my show,Entertainment,#BookMyShow,movies
 cinepolis,Entertainment,,cinepolis
+hotstar,Entertainment,#Subscription,hotstar subscription
 food,Food & Dining,,
 dining,Food & Dining,,
 zomato,Food & Dining,#Zomato,
@@ -129,9 +132,10 @@ reliance retail,Shopping,#Ajio,clothes shopping
 klm fashion,Shopping,,clothes shopping
 auto,Travel,,
 cab,Travel,,
-ola,Travel,,
-rapido,Travel,,
-uber,Travel,,
-irctc,Travel,,
+ola,Travel,#ola,
+rapido,Travel,#rapido,
+uber,Travel,#uber,
+irctc,Travel,#irctc,
+indian railway,Travel,#irctc,train tickets
 travel,Travel,,
-indigo,Travel,,
+indigo,Travel,,flight tickets
