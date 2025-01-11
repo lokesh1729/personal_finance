@@ -36,6 +36,8 @@ update kotak_transactions set "Debit" = null where "Debit" = '';
 
 update mutual_funds set "PRICE" = 0 where "PRICE" is null;
 
+update kotak_transactions  set "Balance" = REPLACE("Balance", ',', '');
+
 -- find duplicate transactions in a month
 select
 	DATE_TRUNC('month', "txn_date") as txn_month,
@@ -224,3 +226,37 @@ SELECT unnest(enum_range(NULL::txn_category_type)) as category;
 
 
 ALTER TABLE transactions ALTER COLUMN category TYPE txn_category_type USING category::text::txn_category_type;
+
+
+
+
+WITH DuplicateEntries AS (
+    SELECT 
+        id,
+        ROW_NUMBER() OVER (
+            PARTITION BY 
+                "Date",
+                "Narration",
+                "Chq./Ref.No.", 
+                "Deposit Amt.",
+                "Value Dt",
+                "Withdrawal Amt.",
+                "Closing Balance"
+            ORDER BY id DESC
+        ) AS row_num
+    FROM hdfc_transactions
+)
+DELETE FROM hdfc_transactions
+WHERE id IN (
+    SELECT id
+    FROM DuplicateEntries
+    WHERE row_num > 1
+);
+
+
+
+
+
+
+
+

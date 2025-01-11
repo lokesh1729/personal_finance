@@ -12,7 +12,7 @@ from common import (
     fix_date_format_df,
     remove_empty_columns,
     remove_empty_rows,
-    remove_named_columns, write_result_df, is_valid_date,
+    remove_named_columns, write_result_df, is_valid_date, check_file_type,
 )
 from common.pdf import unlock_pdf, extract_tables_from_pdf
 
@@ -116,11 +116,13 @@ def hdfc_credit_card_adapter_old(filename, output):
 
 
 def hdfc_credit_card_adapter(filename, output):
-    unlock_pdf(filename, "HDFC_CREDIT_CARD_PASSWORD")
-    for each_filename in extract_tables_from_pdf(filename, [413, 16, 670, 594], [413, 16, 670, 594], "lattice"):
-        try:
-            df = pd.read_csv(each_filename, header=None)
-            if df.iloc[0].equals(pd.Series(["0", "1", "2", 3.00000, 4.00000])):
+    if check_file_type(filename) == "CSV":
+        hdfc_credit_card_adapter_old(filename, output)
+    elif check_file_type(filename) == "PDF":
+        unlock_pdf(filename, "HDFC_CREDIT_CARD_PASSWORD")
+        for each_filename in extract_tables_from_pdf(filename, [413, 16, 670, 594], [413, 16, 670, 594], "lattice"):
+            try:
+                df = pd.read_csv(each_filename, header=None)
                 # Drop the first row
                 df = df.drop(0)
                 df = remove_empty_columns(df)
@@ -128,8 +130,8 @@ def hdfc_credit_card_adapter(filename, output):
                 temp_file_name, _ = os.path.splitext(each_filename)
                 output_file = "%s_output.csv" % temp_file_name
                 hdfc_credit_card_adapter_old(each_filename, output_file)
-        except Exception:
-            print(f"Exception in processing file {each_filename}. Skipping... Exception={traceback.format_exc()}")
+            except Exception:
+                print(f"Exception in processing file {each_filename}. Skipping... Exception={traceback.format_exc()}")
 
 
 def hdfc_upi_credit_card_adapter_old(filename, output):
@@ -163,11 +165,13 @@ def hdfc_upi_credit_card_adapter_old(filename, output):
 
 
 def hdfc_upi_credit_card_adapter(filename, output):
-    unlock_pdf(filename, "HDFC_CREDIT_CARD_PASSWORD")
-    for each_filename in extract_tables_from_pdf(filename, [413, 16, 670, 594], [413, 16, 670, 594], "lattice"):
-        try:
-            df = pd.read_csv(each_filename, header=None)
-            if df.iloc[0].equals(pd.Series(["0", "1", 2.00000, "3", 4.00000, 5.00000])):
+    if check_file_type(filename) == "CSV":
+        hdfc_upi_credit_card_adapter_old(filename, output)
+    elif check_file_type(filename) == "PDF":
+        unlock_pdf(filename, "HDFC_CREDIT_CARD_PASSWORD")
+        for each_filename in extract_tables_from_pdf(filename, [413, 16, 670, 594], [413, 16, 670, 594], "lattice"):
+            try:
+                df = pd.read_csv(each_filename, header=None)
                 # Drop the first row
                 df = df.drop(0)
                 df = remove_empty_columns(df)
@@ -175,5 +179,5 @@ def hdfc_upi_credit_card_adapter(filename, output):
                 temp_file_name, _ = os.path.splitext(each_filename)
                 output_file = "%s_output.csv" % temp_file_name
                 hdfc_upi_credit_card_adapter_old(each_filename, output_file)
-        except Exception:
-            print(f"Exception in processing file {each_filename}. Skipping... Exception={traceback.format_exc()}")
+            except Exception:
+                print(f"Exception in processing file {each_filename}. Skipping... Exception={traceback.format_exc()}")

@@ -1,6 +1,7 @@
 import csv
 import os
 import datetime
+import mimetypes
 import functools
 import re
 from typing import Dict
@@ -120,3 +121,22 @@ def fix_date_format(
         for each_row in result:
             writer.writerow(each_row)
     return output_file
+
+
+def check_file_type(file_path):
+    """
+    Check if the file is a CSV or PDF based on its extension and MIME type.
+
+    :param file_path: Path to the file
+    :return: A string indicating the file type ('CSV', 'PDF', or 'Unknown')
+    """
+    # Get the file extension and MIME type
+    mime_type, _ = mimetypes.guess_type(file_path)
+
+    # Check for CSV or PDF based on MIME type
+    if mime_type == 'text/csv':
+        return 'CSV'
+    elif mime_type == 'application/pdf':
+        return 'PDF'
+    else:
+        return 'Unknown'

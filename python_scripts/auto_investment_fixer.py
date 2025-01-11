@@ -32,12 +32,9 @@ def auto_investment_fixer(hdfc_filepath, kotak_filepath):
                 pattern = re.compile(r'^.*(%s).*$' % value.lower())
                 match = re.match(pattern, row["Description"].lower())
                 if match is not None and match.group(1):
-                    if row["Dr / Cr"] == "DR":
-                        print("Kotak :: Found a match. row='%s'" % row)
-                        kotak_to_investments += float(row["Amount"])
-                        investments[key] += float(row["Amount"])
-                    else:
-                        print("Kotak :: Transaction is not Debit. Something wrong. row='%s'" % row)
+                    print("Kotak :: Found a match. row='%s'" % row)
+                    kotak_to_investments += float(row["Debit"])
+                    investments[key] += float(row["Debit"])
     print("Total HDFC to kotak=%s" % hdfc_to_kotak)
     print("Total kotak to investments=%s" % kotak_to_investments)
     print("Total diff=%s" % (hdfc_to_kotak - kotak_to_investments))
