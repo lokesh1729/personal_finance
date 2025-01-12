@@ -4,7 +4,7 @@ import traceback
 import pandas as pd
 
 from common import remove_empty_rows, remove_empty_columns, parse_str_to_float, check_csv_header_df, fix_date_format_df, \
-    auto_detect_category, write_result, write_result_df
+    auto_detect_category, write_result, write_result_df, check_file_type, is_valid_date
 from common.pdf import unlock_pdf, extract_tables_from_pdf
 
 
@@ -62,14 +62,16 @@ def icici_credit_card_adapter_old(filename, out_filename):
         new_data = []
         for index, row in df.iterrows():
             try:
+                if not is_valid_date(row[0], "%d/%m/%Y"):
+                    continue
                 new_data.append({
                     columns[0]: row[0],
                     columns[1]: row[1],
                     columns[2]: row[2],
                     columns[3]: row[3],
-                    columns[4]: "",
-                    columns[5]: parse_str_to_float(row[4] if isinstance(row[4], float) else row[4].lower().split("cr")[0]),
-                    columns[6]: "Credit" if isinstance(row[4], str) and "cr" in row[4].lower() else "Debit",
+                    columns[4]: row[4],
+                    columns[5]: parse_str_to_float(row[5] if isinstance(row[5], float) else row[5].lower().split("cr")[0]),
+                    columns[6]: "Credit" if isinstance(row[5], str) and "cr" in row[5].lower() else "Debit",
                 })
             except (ValueError, KeyError):
                 pass
@@ -97,11 +99,13 @@ def icici_credit_card_adapter_old(filename, out_filename):
 
 
 def icici_credit_card_adapter(filename, out_filename):
-    unlock_pdf(filename, "ICICI_CREDIT_CARD_PASSWORD")
-    for each_filename in extract_tables_from_pdf(filename, [365, 202, 488, 561], [365, 202, 488, 561], "stream"):
-        try:
-            df = pd.read_csv(each_filename, header=None)
-            if df.iloc[0].equals(pd.Series(["0", 1.00000, "2", "3", "4", "5"])):
+    if check_file_type(filename) == "CSV":
+        icici_credit_card_adapter_old(filename, out_filename)
+    elif check_file_type(filename) == "PDF":
+        unlock_pdf(filename, "ICICI_CREDIT_CARD_PASSWORD")
+        for each_filename in extract_tables_from_pdf(filename, [365, 202, 615, 561], [60, 32, 303, 590], "stream"):
+            try:
+                df = pd.read_csv(each_filename, header=None)
                 # Drop the first row
                 df = df.drop(0)
                 df = remove_empty_columns(df)
@@ -109,8 +113,8 @@ def icici_credit_card_adapter(filename, out_filename):
                 temp_file_name, _ = os.path.splitext(each_filename)
                 output_file = "%s_output.csv" % temp_file_name
                 icici_credit_card_adapter_old(each_filename, output_file)
-        except Exception as exc:
-            print(f"Exception in processing file {each_filename}. Skipping... Exception={traceback.format_exc()}")
+            except Exception as exc:
+                print(f"Exception in processing file {each_filename}. Skipping... Exception={traceback.format_exc()}")
 
 if __name__ == "__main__":
     icici_credit_card_adapter("/Users/lokeshsanapalli/projects/personal_finance/statements/credit_cards/oct_2024/icici_oct_2024.pdf", "/Users/lokeshsanapalli/projects/personal_finance/statements/credit_cards/oct_2024/icici_oct_2024_output.csv")
