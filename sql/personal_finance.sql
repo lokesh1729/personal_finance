@@ -237,7 +237,6 @@ WITH DuplicateEntries AS (
             PARTITION BY 
                 "Date",
                 "Narration",
-                "Chq./Ref.No.", 
                 "Deposit Amt.",
                 "Value Dt",
                 "Withdrawal Amt.",
@@ -251,11 +250,11 @@ WHERE id IN (
     SELECT id
     FROM DuplicateEntries
     WHERE row_num > 1
-);
+) and "Date" > '2024-11-01';
 
 
 
-
+select distinct "Chq./Ref.No." from hdfc_transactions;
 
 
 
