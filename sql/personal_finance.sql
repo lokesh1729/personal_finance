@@ -288,6 +288,10 @@ order by
 
 
 
+select "PLAZA", COUNT(*) from fastag_transaction_details ftd group by 1 order by 1 asc;
+
+
+select "PLAZA", AVG(ftd."AMOUNT") from fastag_transaction_details ftd group by 1 order by 2 desc;
 
 
 
