@@ -1,5 +1,6 @@
 import csv
 import datetime
+import os
 
 from pathlib import Path
 
@@ -15,6 +16,7 @@ def convert_date_format(value, existing_format, new_format):
         return datetime.datetime.strptime(value, new_format).strftime(new_format)
 
 
+# TODO : deprecate and remove this
 def fix_date_format(
     file_path,
     date_column,
@@ -79,41 +81,30 @@ def fix_date_format_df(
     return df
 
 
-def rename_csv_columns(input_filename, output_filename, column_mapping):
+def rename_csv_columns(input_filename, column_mapping):
     """
-    Maps columns in an existing CSV file to a new CSV file based on the provided column mapping.
+    Maps columns in an existing CSV file to a new DataFrame based on the provided column mapping.
 
     Args:
         input_filename (str): The filename of the existing CSV file.
-        output_filename (str): The filename of the new CSV file to be created.
-        column_mapping (dict): A dictionary where the keys are the existing column names and the values are the new column names
+        column_mapping (dict): A dictionary where the keys are the existing column names and the values are the new column names.
+
+    Returns:
+        pd.DataFrame: A DataFrame with the updated column names.
     """
-    # Read the existing CSV file
-    with open(input_filename, mode="r", newline="", encoding="utf-8") as infile:
-        reader = csv.DictReader(infile)
-        fieldnames = reader.fieldnames
+    # Read the input CSV file into a DataFrame
+    df = pd.read_csv(input_filename)
 
-        # Create a new list of fieldnames based on the column_mapping
-        new_fieldnames = list(
-            filter(
-                lambda item: item is not None,
-                [column_mapping.get(field) for field in fieldnames],
-            )
-        )
+    # Filter out columns with None values in the column_mapping
+    valid_mapping = {k: v for k, v in column_mapping.items() if v is not None}
 
-        # Write to a new CSV file with the updated column names
-        with open(output_filename, mode="w", newline="", encoding="utf-8") as outfile:
-            writer = csv.DictWriter(outfile, fieldnames=new_fieldnames)
-            writer.writeheader()
+    # Rename columns based on the valid mapping
+    renamed_df = df.rename(columns=valid_mapping)
 
-            for row in reader:
-                # Create a new row dictionary with updated column names
-                new_row = {
-                    column_mapping.get(key): value
-                    for key, value in row.items()
-                    if column_mapping.get(key) is not None
-                }
-                writer.writerow(new_row)
+    # Drop columns not included in the valid mapping
+    renamed_df = renamed_df[[col for col in renamed_df.columns if col in valid_mapping.values()]]
+
+    return renamed_df
 
 
 def check_csv_header(file_name, header_name):

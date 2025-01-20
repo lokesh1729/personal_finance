@@ -177,41 +177,58 @@ alter table transactions alter column account type account_type using account::T
 drop type old_account_type;
 commit;
 
--- modifying to enum types
 
--- begin;
 
-CREATE TYPE txn_category_type AS ENUM (
-'Salary',
-'Investments',
-'Loan',
-'Rent',
-'Bills',
-'Groceries',
-'Fruits & Vegetables',
-'Food & Dining',
-'Egg & Meat',
-'Household',
-'Health',
-'Personal Care',
-'Shopping',
-'Life Style',
-'Maintenance',
-'Fuel',
-'Travel',
-'Gifts',
-'Productivity',
-'Entertainment',
-'Donation',
-'Misc',
-'ATM Withdrawal',
-'Dividend',
-'Interest',
-'Refund',
-'Ramya',
-'Cashback',
-'Others'
+BEGIN;
+
+-- Step 1: Create a new ENUM type with the desired order
+CREATE TYPE public."txn_category_type_new" AS ENUM (
+    'Salary',
+    'Refund',
+    'Cashback',
+    'Investment Redemption',
+    'Investments',
+    'Loan',
+    'Rent',
+    'Bills',
+    'Groceries',
+    'Fruits & Vegetables',
+    'Food & Dining',
+    'Egg & Meat',
+    'Household',
+    'Health',
+    'Personal Care',
+    'Shopping',
+    'Life Style',
+    'Maintenance',
+    'Fuel',
+    'Travel',
+    'Gifts',
+    'Productivity',
+    'Entertainment',
+    'Donation',
+    'ATM Withdrawal',
+    'Ramya',
+    'Misc',
+    'Others'
 );
+
+-- Step 2: Update all columns using the old ENUM type to use the new ENUM type
+-- Example: Assuming you have a table `transactions` with a column `category` of type txn_category_type
+
+ALTER TABLE transactions ALTER COLUMN category TYPE public."txn_category_type_new" 
+USING category::text::public."txn_category_type_new";
+
+-- Step 3: Drop the old ENUM type
+DROP TYPE public."txn_category_type";
+
+-- Step 4: Rename the new ENUM type to match the old name
+ALTER TYPE public."txn_category_type_new" RENAME TO "txn_category_type";
+
+ALTER TABLE transactions ALTER COLUMN category TYPE public."txn_category_type" 
+USING category::text::public."txn_category_type";
+
+COMMIT;
 
 
 
@@ -255,6 +272,29 @@ WHERE id IN (
 
 
 select distinct "Chq./Ref.No." from hdfc_transactions;
+
+
+select
+	*
+from
+	transactions
+where
+	txn_date between '2023-09-01' and '2023-11-30'
+	and category in ('Investments')
+order by
+	txn_date asc,
+	txn_amount asc;
+
+
+
+
+
+
+
+
+
+
+
 
 
 

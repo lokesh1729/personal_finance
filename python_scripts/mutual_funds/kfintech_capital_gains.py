@@ -1,10 +1,21 @@
-from common.csv_utils import rename_csv_columns
+import argparse
+import os
+
+from common.csv_utils import rename_csv_columns, write_result_df, fix_date_format_df
 from common.utils import fix_date_format
 
 if __name__ == "__main__":
-    base_path = '/Users/lokeshsanapalli/projects/personal_finance/statements/mutual funds/'
-    input_filename = 'fy23-24 capital gains (kfintech).csv'
-    output_filename = 'fy23-24 capital gains (kfintech) converted.csv'
+    # Set up argument parser
+    parser = argparse.ArgumentParser(description="Rename columns and fix date formats in a CSV file.")
+    parser.add_argument("filename", type=str, help="Path to the input CSV file.")
+    args = parser.parse_args()
+
+    # File paths
+    input_filename = args.filename
+    base, ext = os.path.splitext(input_filename)
+    output_filename = f"{base}_output{ext}"
+
+    # Column mapping
     column_mapping = {
         'Fund': None,
         'Fund Name': 'Fund Name',
@@ -32,6 +43,11 @@ if __name__ == "__main__":
         'Long Term With Index': 'Long Term With Index',
         'Long Term Without Index': 'Long Term Without Index',
     }
-    rename_csv_columns(base_path + input_filename, base_path + output_filename, column_mapping)
-    fix_date_format(base_path + output_filename, 'Purchased Date', '%d/%m/%Y', rewrite=True)
-    fix_date_format(base_path + output_filename, 'Redemption Date', '%d/%m/%Y', rewrite=True)
+
+    # Apply column renaming
+    df = rename_csv_columns(input_filename, column_mapping)
+    df = fix_date_format_df(df, 'Purchased Date', '%d/%m/%Y')
+    df = fix_date_format_df(df, 'Redemption Date', '%d/%m/%Y')
+    write_result_df(output_filename, df)
+
+    print(f"Processed file saved as: {output_filename}")

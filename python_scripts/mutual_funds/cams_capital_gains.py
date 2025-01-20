@@ -1,9 +1,22 @@
-from common.csv_utils import rename_csv_columns
+import argparse
+import os
+
+from celery.utils.sysinfo import df
+
+from common import rename_csv_columns, write_result_df, fix_date_format_df
 
 if __name__ == "__main__":
-    base_path = '/Users/lokeshsanapalli/projects/personal_finance/statements/mutual funds/capital gains/'
-    input_filename = 'FY23-24 capital gains.csv'
-    output_filename = 'FY23-24 capital gains converted.csv'
+    # Set up argument parser
+    parser = argparse.ArgumentParser(description="Rename columns in a CSV file based on a column mapping.")
+    parser.add_argument("filename", type=str, help="Path to the input CSV file.")
+    args = parser.parse_args()
+
+    # File paths
+    input_filename = args.filename
+    base, ext = os.path.splitext(input_filename)
+    output_filename = f"{base}_output{ext}"
+
+    # Column mapping
     column_mapping = {
         'AMC Name': 'AMC Name',
         'Folio No': 'Folio No',
@@ -20,7 +33,7 @@ if __name__ == "__main__":
         'Price': 'Redemption Unit Price',
         'STT': 'STT',
         'Desc_1': 'Purchase Description',
-        'Date_1': 'Purchase Date',
+        'Date_1': 'Purchased Date',
         'PurhUnit': 'Purchased Units',
         'RedUnits': 'Redeemed Units',
         'Unit Cost': 'Unit Cost',
@@ -35,4 +48,11 @@ if __name__ == "__main__":
         'Tax Deduct': 'Tax Deducted On Capital Gains',
         'Tax Surcharge': 'Tax Surcharge On Capital Gains',
     }
-    rename_csv_columns(base_path + input_filename, base_path + output_filename, column_mapping)
+
+    # Process the file
+    renamed_df = rename_csv_columns(input_filename, column_mapping)
+    renamed_df = fix_date_format_df(renamed_df, 'Purchased Date', '%d-%b-%Y')
+    renamed_df = fix_date_format_df(renamed_df, 'Redemption Date', '%d-%b-%Y')
+
+    write_result_df(output_filename, renamed_df)
+    print(f"Processed file saved as: {output_filename}")
