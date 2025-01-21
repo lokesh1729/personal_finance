@@ -2,11 +2,10 @@ import argparse
 import os
 
 from common.csv_utils import rename_csv_columns, write_result_df, fix_date_format_df
-from common.utils import fix_date_format
 
 if __name__ == "__main__":
     # Set up argument parser
-    parser = argparse.ArgumentParser(description="Rename columns and fix date formats in a CSV file.")
+    parser = argparse.ArgumentParser(description="Rename columns and fix date formats in KFintech Capital Gains CSV.")
     parser.add_argument("filename", type=str, help="Path to the input CSV file.")
     args = parser.parse_args()
 

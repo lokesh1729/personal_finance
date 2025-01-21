@@ -294,6 +294,17 @@ select "PLAZA", COUNT(*) from fastag_transaction_details ftd group by 1 order by
 select "PLAZA", AVG(ftd."AMOUNT") from fastag_transaction_details ftd group by 1 order by 2 desc;
 
 
+SELECT
+    ndts."Date",
+    ndts."Particulars",
+    COALESCE(CAST(ndts."ICICI PRUDENTIAL PENSION FUND SCHEME C - TIER I Amount (Rs)" AS real), 0) +
+    COALESCE(CAST(ndts."ICICI PRUDENTIAL PENSION FUND SCHEME E - TIER I Amount (Rs)" AS real), 0) +
+    COALESCE(CAST(ndts."ICICI PRUDENTIAL PENSION FUND SCHEME G - TIER I Amount (Rs)" AS real), 0) AS Total_Amount
+FROM
+    nps_detailed_transactions_statement ndts
+WHERE
+    ndts."Particulars" = ''
+    AND ndts."Withdrawal / deduction in units towards intermediary charges (R" = '';
 
 
 
