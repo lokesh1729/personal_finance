@@ -1,66 +1,126 @@
 -- To update `updated_at` column automatically
 
-CREATE OR REPLACE FUNCTION trigger_set_timestamp()
-RETURNS TRIGGER AS $$
-BEGIN
+create or replace
+function trigger_set_timestamp()
+returns trigger as $$
+begin
   NEW.updated_at = NOW();
-  RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
 
-CREATE TRIGGER set_timestamp
-BEFORE UPDATE ON transactions
-FOR EACH ROW
-EXECUTE FUNCTION trigger_set_timestamp();
+return new;
+end;
 
-	
-ALTER TABLE payoneer_transactions ALTER COLUMN "Date" TYPE DATE using "Date"::DATE;
+$$ language plpgsql;
 
-UPDATE payoneer_transactions SET "INR" = REPLACE("INR", ',', '');
+create trigger set_timestamp
+before
+update
+	on
+	transactions
+for each row
+execute function trigger_set_timestamp();
 
-UPDATE paypal_transactions SET "Gross" = regexp_replace("Gross", '\s', '', 'g');
+alter table payoneer_transactions alter column "Date" type DATE
+	using "Date"::DATE;
 
-SELECT * from hdfc_credit_card WHERE EXTRACT('Day' FROM "Date") BETWEEN 1 and 12 and EXTRACT('Month' FROM "Date") BETWEEN 1 and 12;
+update
+	payoneer_transactions
+set
+	"INR" = replace("INR",
+	',',
+	'');
 
-UPDATE hdfc_transactions SET "Withdrawal Amt." = null WHERE "Withdrawal Amt." = '';
+update
+	paypal_transactions
+set
+	"Gross" = regexp_replace("Gross",
+	'\s',
+	'',
+	'g');
 
-ALTER TABLE equitas_transactions  ALTER COLUMN "Date" TYPE DATE using "Date"::DATE;
+select
+	*
+from
+	hdfc_credit_card
+where
+	extract('Day'
+from
+	"Date") between 1 and 12
+	and extract('Month'
+from
+	"Date") between 1 and 12;
 
-ALTER TABLE equitas_transactions  ALTER COLUMN "Debit" TYPE DATE using "Debit"::FLOAT;
+update
+	hdfc_transactions
+set
+	"Withdrawal Amt." = null
+where
+	"Withdrawal Amt." = '';
 
-UPDATE groww_transactions  SET "Amount" = REPLACE("Amount", ',', '');
+alter table equitas_transactions alter column "Date" type DATE
+	using "Date"::DATE;
 
-update hdfc_credit_card  set "Amount" = REPLACE("Amount", ',', '');
+alter table equitas_transactions alter column "Debit" type DATE
+	using "Debit"::FLOAT;
 
-update kotak_transactions set "Debit" = null where "Debit" = '';
+update
+	groww_transactions
+set
+	"Amount" = replace("Amount",
+	',',
+	'');
 
-update mutual_funds set "PRICE" = 0 where "PRICE" is null;
+update
+	hdfc_credit_card
+set
+	"Amount" = replace("Amount",
+	',',
+	'');
 
-update kotak_transactions  set "Balance" = REPLACE("Balance", ',', '');
+update
+	kotak_transactions
+set
+	"Debit" = null
+where
+	"Debit" = '';
 
+update
+	mutual_funds
+set
+	"PRICE" = 0
+where
+	"PRICE" is null;
+
+update
+	kotak_transactions
+set
+	"Balance" = replace("Balance",
+	',',
+	'');
 -- find duplicate transactions in a month
 select
-	DATE_TRUNC('month', "txn_date") as txn_month,
+	DATE_TRUNC('month',
+	"txn_date") as txn_month,
 	account,
 	txn_type,
 	txn_amount,
 	category,
-	string_agg(tags::text, ':::') as tags,
+	string_agg(tags::text,
+	':::') as tags,
 	string_agg(id::text,
 	',') as ids,
-	string_agg(notes::text, ':::') as notes
+	string_agg(notes::text,
+	':::') as notes
 from
 	transactions t
 group by
-	DATE_TRUNC('month', "txn_date"),
+	DATE_TRUNC('month',
+	"txn_date"),
 	account,
 	txn_type,
 	txn_amount,
 	category
 having
 	count(id) > 1;
-
-
 -- mutual funds delete duplicates
 select
 	"MF_NAME",
@@ -69,21 +129,21 @@ select
 	"AMOUNT" ,
 	"UNITS" ,
 	"PRICE",
-	string_agg(id::text, ',') as ids
+	string_agg(id::text,
+	',') as ids
 from
 	mutual_funds mf
-where mf."AMOUNT" > 0
+where
+	mf."AMOUNT" > 0
 group by
 	"MF_NAME",
 	"FOLIO_NUMBER",
 	"TRADE_DATE",
 	"AMOUNT" ,
 	"UNITS" ,
-	"PRICE" 
+	"PRICE"
 having
 	count(id) > 1;
-
-
 -- find duplicate transactions
 select
 	txn_date,
@@ -91,9 +151,12 @@ select
 	txn_type,
 	txn_amount,
 	category,
-	string_agg(tags::text, ':::') as tags,
-	string_agg(id::text,',') as ids,
-	string_agg(notes::text, ':::') as notes
+	string_agg(tags::text,
+	':::') as tags,
+	string_agg(id::text,
+	',') as ids,
+	string_agg(notes::text,
+	':::') as notes
 from
 	transactions t
 group by
@@ -104,7 +167,6 @@ group by
 	category
 having
 	count(id) > 1;
-
 
 select
 	txn_date,
@@ -129,27 +191,32 @@ group by
 having
 	count(*) > 1;
 
-ALTER TABLE transactions RENAME COLUMN "Date" TO "txn_date";
+alter table transactions rename column "Date" to "txn_date";
 
-ALTER TABLE transactions ADD COLUMN created_at timestamp DEFAULT NOW();
+alter table transactions add column created_at timestamp default NOW();
 
-ALTER TABLE transactions ADD COLUMN updated_at timestamp;
+alter table transactions add column updated_at timestamp;
 
-ALTER TYPE account_type ADD VALUE 'Kotak Credit Card';
+alter type account_type add VALUE 'Kotak Credit Card';
 
-ALTER TABLE public.transactions ALTER COLUMN tags set DEFAULT '';
+alter table public.transactions alter column tags set
+default '';
 
-ALTER TABLE public.transactions ALTER COLUMN tags SET NOT null;
+alter table public.transactions alter column tags set
+not null;
 
-CREATE TYPE txn_enum_type AS ENUM ('Credit', 'Debit', 'Others');
+create type txn_enum_type as enum ('Credit',
+'Debit',
+'Others');
 
-ALTER TABLE transactions ALTER COLUMN txn_type TYPE txn_enum_type USING txn_type::txn_enum_type;
-
-
+alter table transactions alter column txn_type type txn_enum_type
+	using txn_type::txn_enum_type;
 
 begin;
-ALTER TYPE account_type RENAME TO old_account_type;
-CREATE TYPE account_type AS ENUM (
+
+alter type account_type rename to old_account_type;
+
+create type account_type as enum (
 'HDFC Bank Account',
 'Kotak Bank Account',
 'Equitas Bank Account',
@@ -173,16 +240,17 @@ CREATE TYPE account_type AS ENUM (
 'DBS Bank Account',
 'Citi Bank Account'
 );
-alter table transactions alter column account type account_type using account::TEXT::account_type;
+
+alter table transactions alter column account type account_type
+	using account::text::account_type;
+
 drop type old_account_type;
+
 commit;
 
-
-
-BEGIN;
-
+begin;
 -- Step 1: Create a new ENUM type with the desired order
-CREATE TYPE public."txn_category_type_new" AS ENUM (
+create type public."txn_category_type_new" as enum (
     'Salary',
     'Refund',
     'Cashback',
@@ -212,67 +280,76 @@ CREATE TYPE public."txn_category_type_new" AS ENUM (
     'Misc',
     'Others'
 );
-
 -- Step 2: Update all columns using the old ENUM type to use the new ENUM type
 -- Example: Assuming you have a table `transactions` with a column `category` of type txn_category_type
 
-ALTER TABLE transactions ALTER COLUMN category TYPE public."txn_category_type_new" 
-USING category::text::public."txn_category_type_new";
-
+alter table transactions alter column category type public."txn_category_type_new"
+	using category::text::public."txn_category_type_new";
 -- Step 3: Drop the old ENUM type
-DROP TYPE public."txn_category_type";
-
+drop type public."txn_category_type";
 -- Step 4: Rename the new ENUM type to match the old name
-ALTER TYPE public."txn_category_type_new" RENAME TO "txn_category_type";
+alter type public."txn_category_type_new" rename to "txn_category_type";
 
-ALTER TABLE transactions ALTER COLUMN category TYPE public."txn_category_type" 
-USING category::text::public."txn_category_type";
+alter table transactions alter column category type public."txn_category_type"
+	using category::text::public."txn_category_type";
 
-COMMIT;
-
-
-
+commit;
 -- get enum values
 
-select e.enumlabel as enum_value
-from pg_type t 
-   join pg_enum e on t.oid = e.enumtypid  
-   join pg_catalog.pg_namespace n ON n.oid = t.typnamespace where t.typname = 'txn_category_type' order by enum_value;
-  
-SELECT unnest(enum_range(NULL::txn_category_type)) as category;
+select
+	e.enumlabel as enum_value
+from
+	pg_type t
+join pg_enum e on
+	t.oid = e.enumtypid
+join pg_catalog.pg_namespace n on
+	n.oid = t.typnamespace
+where
+	t.typname = 'txn_category_type'
+order by
+	enum_value;
 
+select
+	unnest(enum_range(null::txn_category_type)) as category;
 
-ALTER TABLE transactions ALTER COLUMN category TYPE txn_category_type USING category::text::txn_category_type;
+alter table transactions alter column category type txn_category_type
+	using category::text::txn_category_type;
 
-
-
-
-WITH DuplicateEntries AS (
-    SELECT 
-        id,
-        ROW_NUMBER() OVER (
-            PARTITION BY 
+with DuplicateEntries as (
+select
+	id,
+	row_number() over (
+            partition by 
                 "Date",
-                "Narration",
-                "Deposit Amt.",
-                "Value Dt",
-                "Withdrawal Amt.",
-                "Closing Balance"
-            ORDER BY id DESC
-        ) AS row_num
-    FROM hdfc_transactions
+	"Narration",
+	"Deposit Amt.",
+	"Value Dt",
+	"Withdrawal Amt.",
+	"Closing Balance"
+order by
+	id desc
+        ) as row_num
+from
+	hdfc_transactions
 )
-DELETE FROM hdfc_transactions
-WHERE id IN (
-    SELECT id
-    FROM DuplicateEntries
-    WHERE row_num > 1
-) and "Date" > '2024-11-01';
+delete
+from
+	hdfc_transactions
+where
+	id in (
+	select
+		id
+	from
+		DuplicateEntries
+	where
+		row_num > 1
+)
+	and "Date" > '2024-11-01';
 
-
-
-select distinct "Chq./Ref.No." from hdfc_transactions;
-
+select
+	distinct "Chq./Ref.No."
+from
+	hdfc_transactions;
 
 select
 	*
@@ -285,27 +362,61 @@ order by
 	txn_date asc,
 	txn_amount asc;
 
+select
+	"PLAZA",
+	COUNT(*)
+from
+	fastag_transaction_details ftd
+group by
+	1
+order by
+	1 asc;
+
+select
+	"PLAZA",
+	AVG(ftd."AMOUNT")
+from
+	fastag_transaction_details ftd
+group by
+	1
+order by
+	2 desc;
+
+select
+	ndts."Date",
+	ndts."Particulars",
+	coalesce(cast(ndts."ICICI PRUDENTIAL PENSION FUND SCHEME C - TIER I Amount (Rs)" as real),
+	0) +
+    coalesce(cast(ndts."ICICI PRUDENTIAL PENSION FUND SCHEME E - TIER I Amount (Rs)" as real),
+	0) +
+    coalesce(cast(ndts."ICICI PRUDENTIAL PENSION FUND SCHEME G - TIER I Amount (Rs)" as real),
+	0) as Total_Amount
+from
+	nps_detailed_transactions_statement ndts
+where
+	ndts."Particulars" = ''
+	and ndts."Withdrawal / deduction in units towards intermediary charges (R" = '';
+
+select
+	array_agg(shl.id)
+from
+	sbi_home_loan shl
+group by
+	shl."LAN" ,
+	shl."Txn Date" ,
+	shl."Value Date" ,
+	shl."Description" ,
+	shl."Credit" ,
+	shl."Debit" ,
+	shl."Balance"
+having
+	count(*) > 1;
 
 
 
-select "PLAZA", COUNT(*) from fastag_transaction_details ftd group by 1 order by 1 asc;
 
 
-select "PLAZA", AVG(ftd."AMOUNT") from fastag_transaction_details ftd group by 1 order by 2 desc;
-
-
-SELECT
-    ndts."Date",
-    ndts."Particulars",
-    COALESCE(CAST(ndts."ICICI PRUDENTIAL PENSION FUND SCHEME C - TIER I Amount (Rs)" AS real), 0) +
-    COALESCE(CAST(ndts."ICICI PRUDENTIAL PENSION FUND SCHEME E - TIER I Amount (Rs)" AS real), 0) +
-    COALESCE(CAST(ndts."ICICI PRUDENTIAL PENSION FUND SCHEME G - TIER I Amount (Rs)" AS real), 0) AS Total_Amount
-FROM
-    nps_detailed_transactions_statement ndts
-WHERE
-    ndts."Particulars" = ''
-    AND ndts."Withdrawal / deduction in units towards intermediary charges (R" = '';
-
+select sccb."Date", array_agg(id), array_agg(sccb."Transaction Details") from sbi_credit_card_bpcl sccb group by sccb."Date" having count(*) = 1;
 
 
 
