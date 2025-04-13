@@ -415,7 +415,19 @@ group by
 having
 	count(*) > 1;
 
-
+CREATE TABLE IF NOT EXISTS tata_neu_transactions (
+        transaction_type varchar(50),
+        created_at TIMESTAMP,
+        points NUMERIC,
+        points_category VARCHAR(100),
+        program_name VARCHAR(100),
+        transaction_id VARCHAR(100),
+        transaction_number int8,
+        txn_amount NUMERIC,
+        txn_gross_amount NUMERIC,
+        txn_date TIMESTAMP,
+        store VARCHAR(50)
+    );
 
 
 
