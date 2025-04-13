@@ -84,7 +84,7 @@ def is_valid_date(date_string, fmt):
         # Try to parse the date string using strptime
         datetime.datetime.strptime(date_string, fmt)
         return True
-    except ValueError:
+    except (ValueError, TypeError):
         # If ValueError is raised, the date is not valid
         return False
 

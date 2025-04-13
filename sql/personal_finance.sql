@@ -15,9 +15,11 @@ create trigger set_timestamp
 before
 update
 	on
-	transactions
+	hdfc_credit_card
 for each row
 execute function trigger_set_timestamp();
+
+
 
 alter table payoneer_transactions alter column "Date" type DATE
 	using "Date"::DATE;
@@ -315,6 +317,7 @@ select
 alter table transactions alter column category type txn_category_type
 	using category::text::txn_category_type;
 
+
 with DuplicateEntries as (
 select
 	id,
@@ -416,12 +419,36 @@ having
 
 
 
-select sccb."Date", array_agg(id), array_agg(sccb."Transaction Details") from sbi_credit_card_bpcl sccb group by sccb."Date" having count(*) = 1;
+select
+	sccb."Date",
+	array_agg(id),
+	array_agg(sccb."Transaction Details")
+from
+	sbi_credit_card_bpcl sccb
+group by
+	sccb."Date"
+having
+	count(*) = 1;
 
 
 
 
 
-
+select
+	array_agg(id),
+	icc."Amount",
+	icc."Date",
+	icc."Transaction Details",
+	icc."Type"
+from
+	icici_credit_card icc
+group by
+	icc."Amount",
+	icc."Date",
+	icc."Transaction Details",
+	icc."Type"
+having
+	count(*) > 1
+order by icc."Date" desc;
 
 

@@ -11,7 +11,7 @@ from common import (
     remove_empty_columns,
     write_result,
     write_result_df,
-    rename_columns, check_file_type
+    rename_columns, check_file_type, is_valid_date
 )
 from common.pdf import unlock_pdf, extract_tables_from_pdf
 
@@ -32,6 +32,8 @@ def sbi_cc_fix_date_format_df(df):
 def clean_rows(df):
     indices_to_drop = []
     for index, row in df.iterrows():
+        if not row["Date"] or not is_valid_date(row["Date"], "%d %b %y") or not row["Transaction Details"]:
+            indices_to_drop.append(index)
         if isinstance(row["Date"], float):
             if math.isnan(row["Date"]):
                 if (
