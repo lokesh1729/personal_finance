@@ -65,12 +65,13 @@ def kotak_bank_account_adapter(file_name, output):
     df.columns = columns
     df = clean(df)
     result = []
+    manual_result = []
     manual_correction = []
     for index, row in df.iterrows():
+        txn_amount = row[columns[5]] if row[columns[6]].lower() == "dr" \
+            else row[columns[5]] * -1
         category, tags, notes = auto_detect_category(row[columns[3]])
         if category:
-            txn_amount = row[columns[5]] if row[columns[6]].lower() == "dr" \
-                else row[columns[5]] * -1
             result.append(
                 {
                     "txn_date": row[columns[1]],
@@ -84,10 +85,21 @@ def kotak_bank_account_adapter(file_name, output):
             )
         else:
             manual_correction.append(row)
+            manual_result.append({
+                    "txn_date": row[columns[1]],
+                    "account": "Kotak Bank Account",
+                    "txn_type": "Debit" if txn_amount > 0 else "Credit",
+                    "txn_amount": txn_amount,
+                    "category": "Others",
+                    "tags": "",
+                    "notes": "",
+                })
     write_result(output, result)
     temp_file_name, _ = os.path.splitext(file_name)
     modified_filename = "%s_modified.csv" % temp_file_name
     manual_filename = "%s_manual.csv" % temp_file_name
+    manual_output_filename = "%s_manual_output.csv" % temp_file_name
     df = clean_columns(df)
     write_result_df(modified_filename, df)
     write_result_df(manual_filename, pd.DataFrame(manual_correction))
+    write_result_df(manual_output_filename, pd.DataFrame(manual_result))

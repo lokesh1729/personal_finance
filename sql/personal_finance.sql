@@ -464,3 +464,25 @@ having
 order by icc."Date" desc;
 
 
+with RankedNeuTransactions as (
+select
+		id,
+		row_number() over(partition by transaction_type, created_at, points_category, points, program_name, store order by id desc) as row_num
+from
+		tata_neu_transactions
+)
+delete
+from
+	tata_neu_transactions
+where
+	id in (
+	select
+		id
+	from
+		RankedNeuTransactions
+	where
+		row_num > 1
+);
+
+
+

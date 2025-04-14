@@ -46,16 +46,17 @@ def hdfc_bank_account_adapter(file_name, output):
     df = pd.read_excel(file_name, names=columns)
     df = clean(df)
     result = []
+    manual_result = []
     manual_correction = []
     auto_correction = []
     for index, row in df.iterrows():
         category, tags, notes = auto_detect_category(row[columns[1]])
+        txn_amount = -1
+        if row[columns[4]] != "" and not math.isnan(row[columns[4]]):
+            txn_amount = row[columns[4]]
+        elif row[columns[5]] != "" and not math.isnan(row[columns[5]]):
+            txn_amount = row[columns[5]] * -1
         if category:
-            txn_amount = -1
-            if row[columns[4]] != "" and not math.isnan(row[columns[4]]):
-                txn_amount = row[columns[4]]
-            elif row[columns[5]] != "" and not math.isnan(row[columns[5]]):
-                txn_amount = row[columns[5]] * -1
             result.append(
                 {
                     "txn_date": row[columns[0]],
@@ -70,11 +71,24 @@ def hdfc_bank_account_adapter(file_name, output):
             auto_correction.append(row)
         else:
             manual_correction.append(row)
+            manual_result.append(
+                {
+                    "txn_date": row[columns[0]],
+                    "account": "HDFC Bank Account",
+                    "txn_type": "Debit" if txn_amount > 0 else "Credit",
+                    "txn_amount": txn_amount,
+                    "category": "Others",
+                    "tags": "",
+                    "notes": "",
+                }
+            )
     write_result(output, result)
     temp_file_name, _ = os.path.splitext(file_name)
     modified_filename = "%s_modified.csv" % temp_file_name
     manual_filename = "%s_manual.csv" % temp_file_name
+    manual_output_filename = "%s_manual_output.csv" % temp_file_name
     auto_filename = "%s_auto.csv" % temp_file_name
     write_result_df(modified_filename, df)
     write_result_df(manual_filename, pd.DataFrame(manual_correction))
     write_result_df(auto_filename, pd.DataFrame(auto_correction))
+    write_result_df(manual_output_filename, pd.DataFrame(manual_result))

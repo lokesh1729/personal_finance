@@ -1,0 +1,42 @@
+- TODO HDFC Bank Account
+	- TODO run the script
+	- TODO validate remaining transactions
+	- TODO import to hdfc_transactions table
+	- TODO import to transactions table
+- TODO Kotak Bank Account
+	- TODO run auto fixer and validate
+	- TODO import to kotak_transactions table
+	- TODO validate remaining transactions
+- TODO Equitas Bank Account
+	- TODO import to equitas_transactions table
+	- TODO cross-verify buffer money transactions
+- TODO HDFC Credit Card
+	- TODO run the script
+	- TODO validate remaining transactions
+	- TODO import to transactions table
+	- TODO import statement to hdfc_transactions
+	- TODO pay credit card bill
+- TODO HDFC Credit Card2
+	- TODO run the script
+	- TODO validate remaining transactions
+	- TODO import to transactions table
+	- TODO import statement to hdfc_transactions
+	- TODO pay credit card bill
+- TODO SBI Credit Card
+	- TODO run the script
+	- TODO validate remaining transactions
+	- TODO import to transactions table
+	- TODO import to sbi_credit_card table
+	- TODO pay credit card bill
+- TODO SBI Credit Card 2
+	- TODO run the script
+	- TODO validate remaining transactions
+	- TODO import to transactions table
+	- TODO import to sbi_credit_card table
+	- TODO pay credit card bill
+- TODO ICICI Credit Card
+	- TODO validate remaining transactions
+	- TODO import to transactions table
+	- TODO import to icici_credit_card table
+	- TODO pay credit card bill
+- TODO Amazon Pay 

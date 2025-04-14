@@ -71,11 +71,12 @@ def equitas_bank_account_adapter(file_name, output):
     df = clean(df)
     result = []
     manual_correction = []
+    manual_result = []
     for index, row in df.iterrows():
+        txn_amount = row["Withdrawal"] if row["Withdrawal"] > 0 \
+            else row["Deposit"] * -1
         category, tags, notes = auto_detect_category(row[columns[2]])
         if category:
-            txn_amount = row["Withdrawal"] if row["Withdrawal"] > 0 \
-                else row["Deposit"] * -1
             result.append(
                 {
                     "txn_date": row[columns[0]],
@@ -89,9 +90,22 @@ def equitas_bank_account_adapter(file_name, output):
             )
         else:
             manual_correction.append(row)
+            manual_result.append(
+                {
+                    "txn_date": row[columns[0]],
+                    "account": "Equitas Bank Account",
+                    "txn_type": "Debit" if txn_amount > 0 else "Credit",
+                    "txn_amount": txn_amount,
+                    "category": "Others",
+                    "tags": "",
+                    "notes": "",
+                }
+            )
     write_result(output, result)
     temp_file_name, _ = os.path.splitext(file_name)
     modified_filename = "%s_modified.csv" % temp_file_name
     manual_filename = "%s_manual.csv" % temp_file_name
+    manual_output_filename = "%s_manual_output.csv" % temp_file_name
     write_result_df(modified_filename, df)
     write_result_df(manual_filename, pd.DataFrame(manual_correction))
+    write_result_df(manual_output_filename, pd.DataFrame(manual_result))
