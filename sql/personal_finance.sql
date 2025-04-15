@@ -415,32 +415,7 @@ group by
 having
 	count(*) > 1;
 
-CREATE TABLE IF NOT EXISTS tata_neu_transactions (
-        transaction_type varchar(50),
-        created_at TIMESTAMP,
-        points NUMERIC,
-        points_category VARCHAR(100),
-        program_name VARCHAR(100),
-        transaction_id VARCHAR(100),
-        transaction_number int8,
-        txn_amount NUMERIC,
-        txn_gross_amount NUMERIC,
-        txn_date TIMESTAMP,
-        store VARCHAR(50)
-    );
 
-
-
-select
-	sccb."Date",
-	array_agg(id),
-	array_agg(sccb."Transaction Details")
-from
-	sbi_credit_card_bpcl sccb
-group by
-	sccb."Date"
-having
-	count(*) = 1;
 
 
 
