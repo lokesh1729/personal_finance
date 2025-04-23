@@ -26,7 +26,7 @@ def auto_detect_category(description):
                         row["keyword"],
                         row["category"],
                         row["tags"],
-                        row["notes"] if row["notes"] else match.group(1),
+                        f'{row["notes"] if row["notes"] else match.group(1)} \n\n source of truth = {description}',
                     )
                 )
     if len(result) > 1 and not all(list(map(lambda x: x[1] == result[0][1], result))):
