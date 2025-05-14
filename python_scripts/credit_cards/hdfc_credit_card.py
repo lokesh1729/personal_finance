@@ -120,7 +120,7 @@ def hdfc_credit_card_adapter(filename, output):
         hdfc_credit_card_adapter_old(filename, output)
     elif check_file_type(filename) == "PDF":
         unlock_pdf(filename, "HDFC_CREDIT_CARD_PASSWORD")
-        for each_filename in extract_tables_from_pdf(filename, [413, 16, 670, 594], [413, 16, 670, 594], "lattice"):
+        for each_filename in extract_tables_from_pdf(filename, [413, 16, 670, 594], [49, 10, 629, 601], "lattice"):
             try:
                 df = pd.read_csv(each_filename, header=None)
                 # Drop the first row

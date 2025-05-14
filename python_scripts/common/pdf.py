@@ -2,6 +2,8 @@ import os
 import tabula
 from PyPDF2 import PdfReader, PdfWriter
 from dotenv import load_dotenv
+from tabula.errors import CSVParseError
+
 
 def unlock_pdf(pdf_path, env_var_name):
     """
@@ -71,15 +73,18 @@ def extract_tables_from_pdf(pdf_path, coords, coords2, extraction_method):
         # Use coords for the first page and coords2 for subsequent pages
         current_coords = coords if page_number == 1 else coords2
 
-        tables = tabula.read_pdf(
-            pdf_path,
-            area=current_coords,
-            pages=page_number,
-            multiple_tables=False,
-            lattice=(extraction_method == "lattice"),
-            stream=(extraction_method == "stream"),
-            pandas_options={"header": None}
-        )
+        try:
+            tables = tabula.read_pdf(
+                pdf_path,
+                area=current_coords,
+                pages=page_number,
+                multiple_tables=False,
+                lattice=(extraction_method == "lattice"),
+                stream=(extraction_method == "stream"),
+                pandas_options={"header": None}
+            )
+        except CSVParseError as exc:
+            print("Error in processing PDF=%s page_number=%s" % (pdf_path, page_number))
 
         if tables:
             extracted_tables[page_number] = tables[0]  # Add the first table found
