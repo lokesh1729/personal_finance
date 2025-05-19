@@ -106,3 +106,33 @@ def check_file_type(file_path):
         return 'PDF'
     else:
         return 'Unknown'
+
+
+def remove_lines(file_path: str, num_lines: int, position: str = "start") -> None:
+    """
+    Remove a specified number of lines from the start or end of a file.
+
+    Parameters:
+    - file_path (str): Path to the input file.
+    - num_lines (int): Number of lines to remove.
+    - position (str): 'start' or 'end' to indicate from where to remove lines.
+
+    Returns:
+    - None
+    """
+    if position not in ("start", "end"):
+        raise ValueError("Position must be either 'start' or 'end'.")
+
+    with open(file_path, 'r') as file:
+        lines = file.readlines()
+
+    if num_lines >= len(lines):
+        # Remove all lines if num_lines is more than or equal to total lines
+        remaining_lines = []
+    elif position == "start":
+        remaining_lines = lines[num_lines:]
+    else:  # position == "end"
+        remaining_lines = lines[:-num_lines]
+
+    with open(file_path, 'w') as file:
+        file.writelines(remaining_lines)

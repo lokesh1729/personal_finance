@@ -12,7 +12,7 @@ from common import (
     fix_date_format_df,
     remove_empty_columns,
     remove_empty_rows,
-    remove_named_columns, write_result_df, is_valid_date, check_file_type,
+    remove_named_columns, write_result_df, is_valid_date, check_file_type, remove_lines,
 )
 from common.pdf import unlock_pdf, extract_tables_from_pdf
 
@@ -65,9 +65,9 @@ def remove_nan_columns(df):
 
 
 def clean(df, columns):
-    df = remove_mismatch_rows(df, columns)
     df = remove_empty_columns(df)
     df = remove_empty_rows(df)
+    df = remove_mismatch_rows(df, columns)
     pattern = re.compile(r'\b\d+(\.\d{1,2})?\b')
     for index, row in df.iterrows():
         df.at[index, 'Description'] = row["Transaction Description"]
@@ -136,8 +136,11 @@ def hdfc_credit_card_adapter(filename, output):
 
 def hdfc_upi_credit_card_adapter_old(filename, output):
     # Read the CSV file into a DataFrame
+    remove_lines(filename, 4, "start")
     old_columns = ["Date", "Transaction Description", "NeuCoins", "Amount (in Rs.)"]
     df = pd.read_csv(filename, header=None, on_bad_lines="skip")
+    df = remove_empty_columns(df)
+    df = remove_empty_rows(df)
     df.columns = old_columns
     df = clean(df, old_columns)
     df = hdfc_cc_fix_date_format_df(df)
