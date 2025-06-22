@@ -5,7 +5,7 @@ from common import *
 
 def kotak_fix_date_format_df(df):
     if check_csv_header_df(df, "Transaction Date"):
-        df = fix_date_format_df(df, "Transaction Date", "%d-%m-%Y")
+        df = fix_date_format_df(df, "Transaction Date", "%d-%m-%Y %H:%M:%S", "%Y-%m-%d %H:%M:%S")
     if check_csv_header_df(df, "Value Date"):
         df = fix_date_format_df(df, "Value Date", "%d-%m-%Y")
     return df
@@ -16,7 +16,7 @@ def is_na_or_empty(val):
 
 
 def valid_date(val):
-    return is_valid_date(val, "%d-%m-%Y")
+    return is_valid_date(val, "%d-%m-%Y %H:%M:%S")
 
 def valid_number(val):
     return isinstance(val, int) or isinstance(val, float) or isinstance(parse_str_to_float(val), float)
@@ -66,7 +66,6 @@ def kotak_bank_account_adapter(file_name, output):
     df = clean(df)
     result = []
     manual_result = []
-    manual_correction = []
     for index, row in df.iterrows():
         txn_amount = row[columns[5]] if row[columns[6]].lower() == "dr" \
             else row[columns[5]] * -1
@@ -84,7 +83,6 @@ def kotak_bank_account_adapter(file_name, output):
                 }
             )
         else:
-            manual_correction.append(row)
             manual_result.append({
                     "txn_date": row[columns[1]],
                     "account": "Kotak Bank Account",
@@ -97,9 +95,7 @@ def kotak_bank_account_adapter(file_name, output):
     write_result(output, result)
     temp_file_name, _ = os.path.splitext(file_name)
     modified_filename = "%s_modified.csv" % temp_file_name
-    manual_filename = "%s_manual.csv" % temp_file_name
     manual_output_filename = "%s_manual_output.csv" % temp_file_name
     df = clean_columns(df)
     write_result_df(modified_filename, df)
-    write_result_df(manual_filename, pd.DataFrame(manual_correction))
     write_result_df(manual_output_filename, pd.DataFrame(manual_result))

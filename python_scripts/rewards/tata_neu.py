@@ -1,3 +1,14 @@
+"""
+Fetches rewards data from tata neu
+
+Usage:
+
+1. Go to tataneu.com
+2. Login with your mobile number and OTP (automation is tough because it has akamai bot manager and google ReCaptcha)
+3. Go to https://www.tataneu.com/home
+4. Open network tools ---> XHR ---> search for customer ---> copy token from authorization header
+
+"""
 import os
 import requests
 import logging

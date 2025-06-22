@@ -1,0 +1,28 @@
+Salary
+Refund
+Cashback
+Investment Redemption
+Investments
+Loan
+Rent
+Bills
+Groceries
+Fruits & Vegetables
+Food & Dining
+Egg & Meat
+Household
+Health
+Personal Care
+Shopping
+Life Style
+Maintenance
+Fuel
+Travel
+Gifts
+Productivity
+Entertainment
+Donation
+ATM Withdrawal
+Ramya
+Misc
+Others

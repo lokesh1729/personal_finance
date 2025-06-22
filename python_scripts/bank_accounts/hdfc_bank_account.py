@@ -47,8 +47,6 @@ def hdfc_bank_account_adapter(file_name, output):
     df = clean(df)
     result = []
     manual_result = []
-    manual_correction = []
-    auto_correction = []
     for index, row in df.iterrows():
         category, tags, notes = auto_detect_category(row[columns[1]])
         txn_amount = -1
@@ -68,9 +66,7 @@ def hdfc_bank_account_adapter(file_name, output):
                     "notes": notes,
                 }
             )
-            auto_correction.append(row)
         else:
-            manual_correction.append(row)
             manual_result.append(
                 {
                     "txn_date": row[columns[0]],
@@ -79,16 +75,12 @@ def hdfc_bank_account_adapter(file_name, output):
                     "txn_amount": txn_amount,
                     "category": "Others",
                     "tags": "",
-                    "notes": "",
+                    "notes": f"source of truth = {row[columns[1]]}",
                 }
             )
     write_result(output, result)
     temp_file_name, _ = os.path.splitext(file_name)
     modified_filename = "%s_modified.csv" % temp_file_name
-    manual_filename = "%s_manual.csv" % temp_file_name
     manual_output_filename = "%s_manual_output.csv" % temp_file_name
-    auto_filename = "%s_auto.csv" % temp_file_name
     write_result_df(modified_filename, df)
-    write_result_df(manual_filename, pd.DataFrame(manual_correction))
-    write_result_df(auto_filename, pd.DataFrame(auto_correction))
     write_result_df(manual_output_filename, pd.DataFrame(manual_result))

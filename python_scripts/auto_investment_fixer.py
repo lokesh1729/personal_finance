@@ -4,6 +4,7 @@ import re
 from collections import defaultdict
 from typing import Dict
 
+from common import parse_str_to_float
 
 
 def auto_investment_fixer(hdfc_filepath, kotak_filepath):
@@ -17,7 +18,7 @@ def auto_investment_fixer(hdfc_filepath, kotak_filepath):
             match = re.match(pattern, row["Narration"].lower())
             if match is not None and match.group(1):
                 print("HDFC :: Found a match. row='%s'" % row)
-                hdfc_to_kotak += float(row["Withdrawal Amt."])
+                hdfc_to_kotak += parse_str_to_float(row["Withdrawal Amt."])
     with open(kotak_filepath, 'r') as fp:
         reader: csv.DictReader[Dict[str, str]] = csv.DictReader(fp)
         patterns = {
@@ -33,8 +34,8 @@ def auto_investment_fixer(hdfc_filepath, kotak_filepath):
                 match = re.match(pattern, row["Description"].lower())
                 if match is not None and match.group(1):
                     print("Kotak :: Found a match. row='%s'" % row)
-                    kotak_to_investments += float(row["Debit"])
-                    investments[key] += float(row["Debit"])
+                    kotak_to_investments += parse_str_to_float(row["Debit"])
+                    investments[key] += parse_str_to_float(row["Debit"])
     print("Total HDFC to kotak=%s" % hdfc_to_kotak)
     print("Total kotak to investments=%s" % kotak_to_investments)
     print("Total diff=%s" % (hdfc_to_kotak - kotak_to_investments))

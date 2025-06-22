@@ -418,7 +418,8 @@ having
 
 
 
-
+CREATE TABLE transactions_new AS
+SELECT * FROM transactions;
 
 
 select
@@ -439,25 +440,43 @@ having
 order by icc."Date" desc;
 
 
-with RankedNeuTransactions as (
+with RankedAxisTransactions as (
 select
 		id,
-		row_number() over(partition by transaction_type, created_at, points_category, points, program_name, store order by id desc) as row_num
+		row_number() over(partition by txn_date, cheque_ref_no, debit, credit, balance order by id desc) as row_num
 from
-		tata_neu_transactions
+		axis_bank_transactions
 )
 delete
 from
-	tata_neu_transactions
+	axis_bank_transactions
 where
 	id in (
 	select
 		id
 	from
-		RankedNeuTransactions
+		RankedAxisTransactions
 	where
 		row_num > 1
 );
+
+with RankedAxisTransactions as (
+select
+		id,
+		row_number() over(partition by txn_date, cheque_ref_no, debit, credit, balance order by id desc) as row_num
+from
+		axis_bank_transactions
+)
+select
+		id,
+		row_num
+	from
+		RankedAxisTransactions
+	where
+		row_num > 1;
+
+
+
 
 
 

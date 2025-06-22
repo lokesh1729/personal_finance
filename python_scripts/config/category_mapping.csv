@@ -2,7 +2,7 @@ keyword,category,tags,notes
 NWD-526099XXXXXX1943,ATM Withdrawal,,
 ATW-526099XXXXXX1943,ATM Withdrawal,,
 act broadband,Bills,,ACT broadband
-apepdcl,Bills,,APEPDCL Paltheru electricity bill
+apepdcl,Bills,#APEPDCL,APEPDCL Paltheru electricity bill
 eastern power,Bills,,APEPDCL Paltheru electricity bill
 bescom,Bills,,BESCOM Paltheru electricity bill
 dreamplug,Bills,,cred
@@ -42,13 +42,17 @@ biryani,Food & Dining,,
 biriyani,Food & Dining,,
 eatsure,Food & Dining,,
 hospitality,Food & Dining,,
-mc donalds,Food & Dining,,mc donalds
-mcdonalds,Food & Dining,,mc donalds
+mc donalds,Food & Dining,#Mcdonalds,
+mcdonalds,Food & Dining,#Mcdonalds,
+kfc,Food & Dining,#KFC,
+subway,Food & Dining,#Subway,
 tea,Food & Dining,,tea
 estaa sweets,Food & Dining,,Estaa sweets
+kanti sweets,Food & Dining,,
 meghana foods,Food & Dining,,meghana foods
 restaurant,Food & Dining,,
 BABAI TIFFINS,Food & Dining,,
+paradise food,Food & Dining,,
 veggie,Fruits & Vegetables,,
 veggies,Fruits & Vegetables,,
 vegetable,Fruits & Vegetables,,
@@ -77,6 +81,8 @@ geddit,Groceries,#Zepto,
 zepto,Groceries,#Zepto,
 grofers,Groceries,#Blinkit,
 blinkit,Groceries,#Blinkit,
+avenue supermarts,Groceries,#Dmart,
+rfa hypermarket,Groceries,,
 curd,Groceries,,
 milk,Groceries,,
 hyper market,Groceries,,
