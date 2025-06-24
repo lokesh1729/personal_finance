@@ -243,6 +243,7 @@ create type account_type as enum (
 'Citi Bank Account'
 );
 
+
 alter table transactions alter column account type account_type
 	using account::text::account_type;
 

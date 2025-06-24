@@ -215,15 +215,7 @@ def dump_to_database(entries: List[Dict]):
             id, merchant_name, txn_date, txn_type, txn_status, txn_amount, closing_balance, response_reason
         ) VALUES (
             %(id)s, %(merchant_name)s, %(txn_date)s, %(txn_type)s, %(txn_status)s, %(txn_amount)s, %(closing_balance)s, %(response_reason)s
-        )
-        ON CONFLICT (id) DO UPDATE SET
-            merchant_name = EXCLUDED.merchant_name,
-            txn_date = EXCLUDED.txn_date,
-            txn_type = EXCLUDED.txn_type,
-            txn_status = EXCLUDED.txn_status,
-            txn_amount = EXCLUDED.txn_amount,
-            closing_balance = EXCLUDED.closing_balance,
-            response_reason = EXCLUDED.response_reason;
+        );
     """
 
     conn = psycopg2.connect(
