@@ -48,9 +48,9 @@ def transform_data(mapped_data):
     for item in mapped_data:
         try:
             try:
-                txn_date = convert_date_format(item["Date"], "%b %d %Y", "%Y-%m-%d")
-            except ValueError:
                 txn_date = convert_date_format(item["Date"], "%d %b %Y", "%Y-%m-%d")
+            except ValueError:
+                txn_date = convert_date_format(item["Date"], "%d %B %Y", "%Y-%m-%d")
 
             amount_str = item["Amount"].lower()
             if "rs" in amount_str:

@@ -388,7 +388,7 @@ def main():
         inject_cookies(driver, cookies)
 
         # Navigate to the payment statement page
-        target_url = "https://www.amazon.in/pay/history?tab=ALL&filter={%22paymentInstruments%22:[{%22paymentInstrumentType%22:%22SVA%22,%22paymentInstrumentIds%22:null},{%22paymentInstrumentType%22:%22GC%22,%22paymentInstrumentIds%22:null},{%22paymentInstrumentType%22:%22APV%22,%22paymentInstrumentIds%22:null}]}"
+        target_url = "https://www.amazon.in/pay/history?tab=ALL&filter={%22searchWords%22:[],%22paymentInstruments%22:[{%22paymentInstrumentType%22:%22GC%22},{%22paymentInstrumentType%22:%22SVA%22},{%22paymentInstrumentType%22:%22APV%22}],%22dateRanges%22:[{%22from%22:%222025-04-27%22,%22to%22:%222025-06-01%22}]}"
         print(f"Navigating to {target_url}")
         driver.get(target_url)
 
