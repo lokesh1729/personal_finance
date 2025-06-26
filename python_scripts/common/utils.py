@@ -44,7 +44,7 @@ def auto_detect_category(description):
         return most_relevant[1], most_relevant[2], most_relevant[3]
     if len(result) > 0:
         return result[0][1], result[0][2], result[0][3]
-    return None, None, None
+    return "Others", "", ""
 
 
 def clean_string(input_string: str) -> str:

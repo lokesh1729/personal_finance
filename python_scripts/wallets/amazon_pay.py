@@ -1,17 +1,20 @@
-import time
 import argparse
 import os
-import psycopg2
+import time
 from datetime import datetime
+
+import psycopg2
+from dotenv import load_dotenv
 from selenium import webdriver
+from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import TimeoutException, NoSuchElementException
+from selenium.webdriver.support.ui import WebDriverWait
 from webdriver_manager.chrome import ChromeDriverManager
-from dotenv import load_dotenv
+
+from common import utils
 
 # Load environment variables from .env
 load_dotenv()
@@ -193,11 +196,10 @@ def parse_amount(amount_text):
 def parse_date(date_str):
     """Convert date from '27 Apr 2025, 01:04 AM' to 'YYYY-MM-DD' format."""
     try:
-        # Parse the date string
-        if "Credited on" in date_str.lower():
-            date_str = date_str.split("Credited on:")[1]
+        # Normalize and clean the date string
+        if "credited on:" in date_str.lower():
+            date_str = date_str.lower().split("credited on:")[1]
         dt = datetime.strptime(date_str.strip(), '%d %b %Y, %I:%M %p')
-        # Return in YYYY-MM-DD format
         return dt.strftime('%Y-%m-%d')
     except Exception as e:
         print(f"Error parsing date '{date_str}': {e}")
@@ -222,7 +224,8 @@ def insert_transaction(conn, txn_data):
         txn_type = "Credit" if txn_amount > 0 else "Debit"
 
         # Prepare notes
-        notes = f"subwallet: {txn_data['subwallet']}\n\n{txn_data['transaction_details']}"
+        category, tags, notes = utils.auto_detect_category(txn_data['transaction_details'])
+        notes = f"subwallet: {txn_data['subwallet']}\n\n{txn_data['transaction_details']}\n\n" + notes
 
         # SQL for inserting a transaction
         insert_sql = """
@@ -239,8 +242,8 @@ def insert_transaction(conn, txn_data):
             "Amazon Pay",  # Hardcoded account
             txn_type,
             txn_amount * -1 if txn_type == 'Debit' else txn_amount,  # Store absolute value
-            "Others",  # Hardcoded category
-            "",  # Empty tags
+            category,  # Hardcoded category
+            tags,  # Empty tags
             notes
         ))
 
