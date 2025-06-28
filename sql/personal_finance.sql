@@ -477,16 +477,6 @@ select
 		row_num > 1;
 
 
-UPDATE transactions
-SET txn_amount = -txn_amount
-WHERE account = 'Amazon Pay'
-  AND category = 'Cashback'
-  AND txn_amount < 0;
-
-
-SELECT DISTINCT notes
-FROM transactions
-WHERE account = 'Amazon Pay'
-  AND category = 'Others';
+select distinct "Debit / Credit" from hdfc_credit_card;
 
 
