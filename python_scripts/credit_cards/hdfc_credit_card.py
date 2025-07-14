@@ -136,7 +136,6 @@ def hdfc_credit_card_adapter(filename, output):
 
 def hdfc_upi_credit_card_adapter_old(filename, output):
     # Read the CSV file into a DataFrame
-    remove_lines(filename, 4, "start")
     old_columns = ["Date", "Transaction Description", "NeuCoins", "Amount (in Rs.)"]
     df = pd.read_csv(filename, header=None, on_bad_lines="skip")
     df = remove_empty_columns(df)

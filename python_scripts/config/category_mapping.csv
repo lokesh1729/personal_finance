@@ -9,10 +9,11 @@ dreamplug,Bills,,cred
 jiotelecom,Bills,,jio recharge
 reliance jio,Bills,,jio recharge
 airtel,Bills,,airtel recharge
+vodafone,Bills,,vodafone recharge
 paytm payments utility,Bills,,
 water bill,Bills,,water bill
 drinkprime,Bills,,water bill
-VODAFONEIDEA,Bills,,amma recharge
+VODAFONEIDEA,Bills,,vodafone recharge
 rewards earned,Cashback,,icici amazon pay cashback
 cashback,Cashback,,cashback
 refund,Refund,,
@@ -36,6 +37,7 @@ cinepolis,Entertainment,,cinepolis
 hotstar,Entertainment,#Subscription,hotstar subscription
 entertainment,Entertainment,,
 district,Entertainment,#District,
+beverage,Food & Dining,,
 food,Food & Dining,,
 dining,Food & Dining,,
 zomato,Food & Dining,#Zomato,

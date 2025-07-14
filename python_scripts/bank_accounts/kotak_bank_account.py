@@ -25,7 +25,7 @@ def valid_number(val):
 def clean(df):
     indices_to_drop = []
     for index, row in df.iterrows():
-        if is_na_or_empty(row["Transaction Date"]) or is_na_or_empty(row["Description"]) or is_na_or_empty(row["Chq / Ref No."]):
+        if is_na_or_empty(row["Transaction Date"]) or is_na_or_empty(row["Description"]):
             indices_to_drop.append(index)
             continue
         if not valid_date(row["Transaction Date"]) or not valid_number(row["Amount"]):
