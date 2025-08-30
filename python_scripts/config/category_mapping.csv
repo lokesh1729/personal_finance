@@ -58,6 +58,9 @@ meghana foods,Food & Dining,,meghana foods
 restaurant,Food & Dining,,
 BABAI TIFFINS,Food & Dining,,
 paradise food,Food & Dining,,
+coffee,Food & Dining,,
+bakery,Food & Dining,,
+juice,Food & Dining,,
 veggie,Fruits & Vegetables,,
 veggies,Fruits & Vegetables,,
 vegetable,Fruits & Vegetables,,
@@ -110,6 +113,8 @@ pooja,Household,#pooja,
 iron,Household,,
 flower,Household,,
 ikea,Household,,
+snabbit,Household,#Snabbit,
+cable,Household,,cable bill
 equity mutual fund,Investments,#MutualFunds,long term - equity mutual funds
 smallcase stocks,Investments,#Stocks,long term - indian stocks
 adhoc stocks,Investments,#Stocks,long term - indian stocks
@@ -133,10 +138,12 @@ toy,Misc,,
 toys,Misc,,
 bharatpe,Misc,,
 cashmycar,Misc,,olx
+parking,Misc,,
 emergency fund,Others,#MonthlyBuffer,short term - monthly buffer & emergency fund
 house goal,Others,#MonthlyBuffer,
 salon,Personal Care,,
 hair cut,Personal Care,,
+footwear,Personal Care,,
 hetzner,Productivity,,hetzner
 apple,Productivity,#apple #subscription,
 namecheap,Productivity,,
@@ -158,6 +165,7 @@ OLACABS,Travel,#ola,
 rapido,Travel,#rapido,
 uber,Travel,#uber,
 irctc,Travel,#irctc,
+namma yatri,Travel,,
 indian railway,Travel,#irctc,train tickets
 travel,Travel,,
 indigo,Travel,,flight tickets

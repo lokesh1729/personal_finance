@@ -32,8 +32,6 @@ def sbi_cc_fix_date_format_df(df):
 def clean_rows(df):
     indices_to_drop = []
     for index, row in df.iterrows():
-        if not row["Date"] or not is_valid_date(row["Date"], "%d %b %y") or not row["Transaction Details"]:
-            indices_to_drop.append(index)
         if isinstance(row["Date"], float):
             if math.isnan(row["Date"]):
                 if (
@@ -46,6 +44,8 @@ def clean_rows(df):
                     indices_to_drop.append(index)
             else:
                 indices_to_drop.append(index)
+        if not row["Date"] or not is_valid_date(row["Date"], "%d %b %y") or not row["Transaction Details"]:
+            indices_to_drop.append(index)
     if indices_to_drop:
         df.drop(indices_to_drop, inplace=True)
     return df
@@ -53,21 +53,31 @@ def clean_rows(df):
 
 def sbi_credit_card_adapter_old(filename, out_filename):
     # Read the CSV file into a DataFrame
-    columns = ["Date", "Transaction Details", "Amount", "Type"]
+    columns = ["Date", "", "Transaction Details", "Amount", "Type"]
     df = pd.read_csv(filename, header=None, on_bad_lines="skip")
     df.columns = columns
+    
+    # Concatenate the second empty column with the third transaction details column
+    df["Transaction Details"] = df[""].astype(str) + " " + df["Transaction Details"].astype(str)
+    
+    # Drop the empty column
+    df = df.drop("", axis=1)
+    
+    # Clean the concatenated transaction details (remove extra spaces and NaN values)
+    df["Transaction Details"] = df["Transaction Details"].str.replace("nan ", "").str.replace(" nan", "").str.strip()
+    
     df = clean(df)
     df = sbi_cc_fix_date_format_df(df)
     result = []
     for index, row in df.iterrows():
-        if row[columns[3]] == "D":
-            category, tags, notes = auto_detect_category(row[columns[1]])
+        if row["Type"] in ("D", "M"):
+            category, tags, notes = auto_detect_category(row["Transaction Details"])
             result.append(
                 {
-                    "txn_date": row[columns[0]],
+                    "txn_date": row["Date"],
                     "account": "SBI Credit Card",
                     "txn_type": "Debit",
-                    "txn_amount": row[columns[2]],
+                    "txn_amount": row["Amount"],
                     "category": category,
                     "tags": tags,
                     "notes": notes,

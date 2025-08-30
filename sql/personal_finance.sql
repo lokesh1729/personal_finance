@@ -1,324 +1,3 @@
--- To update `updated_at` column automatically
-
-create or replace
-function trigger_set_timestamp()
-returns trigger as $$
-begin
-  NEW.updated_at = NOW();
-
-return new;
-end;
-
-$$ language plpgsql;
-
-create trigger set_timestamp
-before
-update
-	on
-	hdfc_credit_card
-for each row
-execute function trigger_set_timestamp();
-
-
-
-alter table payoneer_transactions alter column "Date" type DATE
-	using "Date"::DATE;
-
-update
-	payoneer_transactions
-set
-	"INR" = replace("INR",
-	',',
-	'');
-
-update
-	paypal_transactions
-set
-	"Gross" = regexp_replace("Gross",
-	'\s',
-	'',
-	'g');
-
-select
-	*
-from
-	hdfc_credit_card
-where
-	extract('Day'
-from
-	"Date") between 1 and 12
-	and extract('Month'
-from
-	"Date") between 1 and 12;
-
-update
-	hdfc_transactions
-set
-	"Withdrawal Amt." = null
-where
-	"Withdrawal Amt." = '';
-
-alter table equitas_transactions alter column "Date" type DATE
-	using "Date"::DATE;
-
-alter table equitas_transactions alter column "Debit" type DATE
-	using "Debit"::FLOAT;
-
-update
-	groww_transactions
-set
-	"Amount" = replace("Amount",
-	',',
-	'');
-
-update
-	hdfc_credit_card
-set
-	"Amount" = replace("Amount",
-	',',
-	'');
-
-update
-	kotak_transactions
-set
-	"Debit" = null
-where
-	"Debit" = '';
-
-update
-	mutual_funds
-set
-	"PRICE" = 0
-where
-	"PRICE" is null;
-
-update
-	kotak_transactions
-set
-	"Balance" = replace("Balance",
-	',',
-	'');
--- find duplicate transactions in a month
-select
-	DATE_TRUNC('month',
-	"txn_date") as txn_month,
-	account,
-	txn_type,
-	txn_amount,
-	category,
-	string_agg(tags::text,
-	':::') as tags,
-	string_agg(id::text,
-	',') as ids,
-	string_agg(notes::text,
-	':::') as notes
-from
-	transactions t
-group by
-	DATE_TRUNC('month',
-	"txn_date"),
-	account,
-	txn_type,
-	txn_amount,
-	category
-having
-	count(id) > 1;
--- mutual funds delete duplicates
-select
-	"MF_NAME",
-	"FOLIO_NUMBER",
-	"TRADE_DATE",
-	"AMOUNT" ,
-	"UNITS" ,
-	"PRICE",
-	string_agg(id::text,
-	',') as ids
-from
-	mutual_funds mf
-where
-	mf."AMOUNT" > 0
-group by
-	"MF_NAME",
-	"FOLIO_NUMBER",
-	"TRADE_DATE",
-	"AMOUNT" ,
-	"UNITS" ,
-	"PRICE"
-having
-	count(id) > 1;
--- find duplicate transactions
-select
-	txn_date,
-	account,
-	txn_type,
-	txn_amount,
-	category,
-	string_agg(tags::text,
-	':::') as tags,
-	string_agg(id::text,
-	',') as ids,
-	string_agg(notes::text,
-	':::') as notes
-from
-	transactions t
-group by
-	txn_date,
-	account,
-	txn_type,
-	txn_amount,
-	category
-having
-	count(id) > 1;
-
-select
-	txn_date,
-	account,
-	txn_type,
-	txn_amount,
-	category,
-	tags,
-	notes,
-	string_agg(id::text,
-	',') as ids
-from
-	walnut_transactions wt
-group by
-	txn_date,
-	account,
-	txn_type,
-	txn_amount,
-	category,
-	tags,
-	notes
-having
-	count(*) > 1;
-
-alter table transactions rename column "Date" to "txn_date";
-
-alter table transactions add column created_at timestamp default NOW();
-
-alter table transactions add column updated_at timestamp;
-
-alter type account_type add VALUE 'Kotak Credit Card';
-
-alter table public.transactions alter column tags set
-default '';
-
-alter table public.transactions alter column tags set
-not null;
-
-create type txn_enum_type as enum ('Credit',
-'Debit',
-'Others');
-
-alter table transactions alter column txn_type type txn_enum_type
-	using txn_type::txn_enum_type;
-
-begin;
-
-alter type account_type rename to old_account_type;
-
-create type account_type as enum (
-'HDFC Bank Account',
-'Kotak Bank Account',
-'Equitas Bank Account',
-'Cash',
-'HDFC Credit Card',
-'Kotak Credit Card',
-'SBI Credit Card',
-'ICICI Credit Card',
-'Others',
-'Amazon Pay',
-'IDFC First Bank Account',
-'Fi Bank Account',
-'SBI Bank Account',
-'Freecharge',
-'Paytm Wallet',
-'Paytm Food Wallet',
-'Ola Money Postpaid',
-'Simpl',
-'IndusInd Credit Card',
-'Slice Credit Card',
-'DBS Bank Account',
-'Citi Bank Account'
-);
-
-
-alter table transactions alter column account type account_type
-	using account::text::account_type;
-
-drop type old_account_type;
-
-commit;
-
-begin;
--- Step 1: Create a new ENUM type with the desired order
-create type public."txn_category_type_new" as enum (
-    'Salary',
-    'Refund',
-    'Cashback',
-    'Investment Redemption',
-    'Investments',
-    'Loan',
-    'Rent',
-    'Bills',
-    'Groceries',
-    'Fruits & Vegetables',
-    'Food & Dining',
-    'Egg & Meat',
-    'Household',
-    'Health',
-    'Personal Care',
-    'Shopping',
-    'Life Style',
-    'Maintenance',
-    'Fuel',
-    'Travel',
-    'Gifts',
-    'Productivity',
-    'Entertainment',
-    'Donation',
-    'ATM Withdrawal',
-    'Ramya',
-    'Misc',
-    'Others'
-);
--- Step 2: Update all columns using the old ENUM type to use the new ENUM type
--- Example: Assuming you have a table `transactions` with a column `category` of type txn_category_type
-
-alter table transactions alter column category type public."txn_category_type_new"
-	using category::text::public."txn_category_type_new";
--- Step 3: Drop the old ENUM type
-drop type public."txn_category_type";
--- Step 4: Rename the new ENUM type to match the old name
-alter type public."txn_category_type_new" rename to "txn_category_type";
-
-alter table transactions alter column category type public."txn_category_type"
-	using category::text::public."txn_category_type";
-
-commit;
--- get enum values
-
-select
-	e.enumlabel as enum_value
-from
-	pg_type t
-join pg_enum e on
-	t.oid = e.enumtypid
-join pg_catalog.pg_namespace n on
-	n.oid = t.typnamespace
-where
-	t.typname = 'txn_category_type'
-order by
-	enum_value;
-
-select
-	unnest(enum_range(null::txn_category_type)) as category;
-
-alter table transactions alter column category type txn_category_type
-	using category::text::txn_category_type;
-
-
 with DuplicateEntries as (
 select
 	id,
@@ -385,6 +64,7 @@ group by
 	1
 order by
 	2 desc;
+
 
 select
 	ndts."Date",
@@ -478,5 +158,268 @@ select
 
 
 select distinct "Debit / Credit" from hdfc_credit_card;
+
+
+
+SELECT
+  txn_date,
+  account,
+  txn_type,
+  txn_amount,
+  category,
+  LOWER(tags) AS tags_normalized,
+  LOWER(notes) AS notes_normalized,
+  COUNT(*) AS duplicate_count
+FROM
+  public.transactions
+GROUP BY
+  txn_date,
+  account,
+  txn_type,
+  txn_amount,
+  category,
+  LOWER(tags),
+  LOWER(notes)
+HAVING
+  COUNT(*) > 1;
+
+
+
+
+
+select * from equitas_transactions et where et."Deposit" > 30000 order by et."Date" desc;
+
+
+select
+	*
+from
+	hdfc_transactions ht
+where
+	ht."Date" between '2025-01-01' and '2025-01-31'
+	and (ht."Withdrawal Amt." > 20000
+		or ht."Deposit Amt." > 20000)
+order by
+	ht."Date" desc;
+
+-- EPF amount
+
+select * from transactions where notes ilike '%epf%'; -- 5851
+
+select * from transactions where tags ilike '#AdhocLoan #Nagendra';
+
+select * from transactions where (tags ilike '%#' || '5851' || '%') or (id = '5851') order by txn_date asc;
+
+-- home interior
+
+select * from transactions where tags ilike '%rupeek%' order by txn_date desc;
+
+
+-- context save checkpoint
+
+-- EPF and txn tagging is done
+
+-- go back and analyse misc expenses especially credit card bill payments from equitas
+
+
+
+-- credit card bill analysis ---> if the bill was paid in june'25 then get the txns from april'25 to may'25
+-- except hdfc credit card 26th april to 25th may 2025 and 2nd may to 1st june 2025
+-- 
+
+
+select
+	*
+from
+	equitas_transactions et
+where
+	(et."Narration" ilike '%cred%'
+		or et."Narration" ilike '%cheq%')
+	and et."Narration" not ilike '%CREDIT INTEREST CAPITALISED%'
+order by et."Date" desc;
+
+
+select
+	*
+from
+	hdfc_transactions ht
+where
+	(ht."Narration" ilike '%cred%'
+		or ht."Narration" ilike '%cheq%')
+	and ht."Narration" not ilike '%credit interest%'
+order by ht."Date" desc;
+
+
+select
+	*
+from
+	hdfc_credit_card hcc
+where
+	hcc."Date" between '2024-09-26' and '2024-10-25'
+	and hcc.neucoins is null
+order by
+	hcc."Date" desc;
+
+
+
+select
+	*
+from
+	hdfc_credit_card hcc
+where
+	hcc."Debit / Credit" = 'cr' and hcc."Date" between '2024-04-10' and '2024-04-14';
+
+select
+	*
+from
+	sbi_credit_card scc
+where
+	scc."Type" = 'C' and scc."Date" between '2024-04-10' and '2024-04-14';
+
+
+select
+	*
+from
+	icici_credit_card icc
+where
+	icc."Type" = 'CR'
+	and icc."Date" between '2024-04-10' and '2024-04-14';
+
+
+
+select * from transactions t where t.tags ilike '%#adhocloan%';
+
+
+select
+	*
+from
+	transactions t
+where t.tags ilike '%#Ramya%' or t.category = 'Ramya'
+order by t.txn_date desc;
+
+
+
+select
+	*
+from
+	transactions t
+where
+	t.account in ('HDFC Credit Card', 'SBI Credit Card', 'ICICI Credit Card', 'Kotak Credit Card')
+	and t.txn_date between '2025-02-26' and '2025-04-01'
+	and t.category not in ('Food & Dining', 'Groceries', 'Fuel')
+order by t.txn_amount desc;
+
+
+
+
+select
+	*
+from
+	hdfc_transactions ht
+where
+	ht."Date" between '2025-06-01' and '2025-06-30'
+	and ht."Narration" ilike '%cheq digital%';
+
+
+
+SELECT
+    SUM(
+        CASE 
+            WHEN ht."Withdrawal Amt." IS NOT NULL THEN ht."Withdrawal Amt."
+            ELSE ht."Deposit Amt." * -1
+        END
+    ) AS total
+FROM
+    hdfc_transactions ht
+WHERE
+    ht."Date" BETWEEN '2025-06-01' AND '2025-06-30'
+    AND ht."Narration" ILIKE '%cheq digital%';
+
+
+
+select
+	*
+from
+	hdfc_transactions ht
+where
+	ht."Date" between '2025-05-01' and '2025-05-30'
+	and ht."Narration" not ilike '%lokes%'
+	and ht."Narration" not ilike '%sanap%'
+	and ht."Narration" not ilike '%AMAZONPAYBALANCELOAD%'
+	and ht."Narration" not ilike '%cheq digital%'
+	and ht."Narration" not ilike '%rupeek%'
+	and ht."Narration" not ilike '%RAZORPAY_OZOST%'
+	and ht."Narration" not ilike '%KMBLDRAOPERATIONS%'
+	and ht."Narration" not ilike '%LICHOUSINGFINANCELTD%'
+	and ht."Narration" not ilike '%NPS TRUST%'
+	and ht."Narration" not ilike '%dubai%'
+	and ht."Narration" not ilike '%AMAZONPAYCCBILLPAYMENT%';
+
+
+
+
+
+select
+	sum(ht."Withdrawal Amt.")
+from
+	hdfc_transactions ht
+where
+	ht."Date" between '2025-04-01' and '2025-04-30'
+	and ht."Narration" not ilike '%lokes%'
+	and ht."Narration" not ilike '%sanap%'
+	and ht."Narration" not ilike '%AMAZONPAYBALANCELOAD%'
+	and ht."Narration" not ilike '%cheq digital%'
+	and ht."Narration" not ilike '%rupeek%'
+	and ht."Narration" not ilike '%RAZORPAY_OZOSTSBWL5TJ78_129237596%'
+	and ht."Narration" not ilike '%KMBLDRAOPERATIONS%'
+	and ht."Narration" not ilike '%LICHOUSINGFINANCELTD%'
+	and ht."Narration" not ilike '%NPS TRUST%'
+	and ht."Narration" not ilike '%dubai%'
+	and ht."Narration" not ilike '%AMAZONPAYCCBILLPAYMENT%';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
