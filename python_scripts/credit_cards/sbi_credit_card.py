@@ -52,19 +52,24 @@ def clean_rows(df):
 
 
 def sbi_credit_card_adapter_old(filename, out_filename):
+    extra_empty_column = False
     # Read the CSV file into a DataFrame
-    columns = ["Date", "", "Transaction Details", "Amount", "Type"]
+    if extra_empty_column:
+        columns = ["Date", "", "Transaction Details", "Amount", "Type"]
+    else:
+        columns = ["Date", "Transaction Details", "Amount", "Type"]
     df = pd.read_csv(filename, header=None, on_bad_lines="skip")
     df.columns = columns
-    
-    # Concatenate the second empty column with the third transaction details column
-    df["Transaction Details"] = df[""].astype(str) + " " + df["Transaction Details"].astype(str)
-    
-    # Drop the empty column
-    df = df.drop("", axis=1)
-    
-    # Clean the concatenated transaction details (remove extra spaces and NaN values)
-    df["Transaction Details"] = df["Transaction Details"].str.replace("nan ", "").str.replace(" nan", "").str.strip()
+
+    if extra_empty_column:
+        # Concatenate the second empty column with the third transaction details column
+        df["Transaction Details"] = df[""].astype(str) + " " + df["Transaction Details"].astype(str)
+
+        # Drop the empty column
+        df = df.drop("", axis=1)
+
+        # Clean the concatenated transaction details (remove extra spaces and NaN values)
+        df["Transaction Details"] = df["Transaction Details"].str.replace("nan ", "").str.replace(" nan", "").str.strip()
     
     df = clean(df)
     df = sbi_cc_fix_date_format_df(df)

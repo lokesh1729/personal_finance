@@ -336,26 +336,6 @@ WHERE
 
 
 
-select
-	*
-from
-	hdfc_transactions ht
-where
-	ht."Date" between '2025-05-01' and '2025-05-30'
-	and ht."Narration" not ilike '%lokes%'
-	and ht."Narration" not ilike '%sanap%'
-	and ht."Narration" not ilike '%AMAZONPAYBALANCELOAD%'
-	and ht."Narration" not ilike '%cheq digital%'
-	and ht."Narration" not ilike '%rupeek%'
-	and ht."Narration" not ilike '%RAZORPAY_OZOST%'
-	and ht."Narration" not ilike '%KMBLDRAOPERATIONS%'
-	and ht."Narration" not ilike '%LICHOUSINGFINANCELTD%'
-	and ht."Narration" not ilike '%NPS TRUST%'
-	and ht."Narration" not ilike '%dubai%'
-	and ht."Narration" not ilike '%AMAZONPAYCCBILLPAYMENT%';
-
-
-
 
 
 select
@@ -380,40 +360,65 @@ where
 
 
 
+-- Cash txns that are not tagged
+
+SELECT
+    *
+FROM
+    transactions
+WHERE
+    account = 'Cash'
+    AND txn_type = 'Debit'
+    and category != 'Others'
+    AND tags !~ '[0-9]'   -- exclude if tags contain any digit
+ORDER BY
+    txn_date DESC
+LIMIT 100;
+
+
+-- untracked cash
+
+select
+	*
+from
+	transactions
+where
+	category = 'Misc'
+	and account = 'Cash'
+	and tags ilike '%#Untracked%';
 
 
 
+-- duplicate txns
+
+select
+	txn_amount,
+	array_to_string(array_agg(txn_date), ','),
+	array_to_string(array_agg(account), ','),
+	array_to_string(array_agg(notes), ',')
+from
+	transactions
+group by
+	txn_amount
+having
+	count(*) > 1;
 
 
 
+-- cash txns
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+select
+	SUM(txn_amount),
+	date_trunc('MONTH', txn_date)
+from
+	transactions
+where
+	account = 'Cash'
+	and category != 'Others'
+group by
+	date_trunc('MONTH', txn_date)
+order by
+	2 desc;
 
 
 
