@@ -423,6 +423,21 @@ order by
 
 
 
+SELECT id, tags,
+       regexp_replace(tags, '#([0-9]+)', '#\1#', 'g') AS new_tags
+FROM transactions
+WHERE tags ~ '#[0-9]+';
+
+
+
+UPDATE transactions
+SET tags = regexp_replace(tags, '#([0-9]+)', '#\1#', 'g')
+WHERE tags ~ '#[0-9]+';
+
+
+
+
+
 
 
 

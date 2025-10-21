@@ -1,99 +1,124 @@
-import math
-import os
+import logging
 import re
-import traceback
 import pandas as pd
 
 from common import (
     auto_detect_category,
     parse_str_to_float,
     write_result,
-    check_csv_header_df,
-    fix_date_format_df,
     remove_empty_columns,
-    remove_empty_rows,
-    remove_named_columns, write_result_df, is_valid_date, check_file_type, remove_lines,
+    check_file_type,
 )
+from common.csv_utils import convert_date_format
 from common.pdf import unlock_pdf, extract_tables_from_pdf
 
-
-def hdfc_cc_fix_date_format_df(df):
-    if check_csv_header_df(df, "Date"):
-        df = fix_date_format_df(df, "Date", "%d/%m/%Y")
-    return df
-
-
-def hdfc_cc_upi_fix_date_format_df(df):
-    if check_csv_header_df(df, "Date"):
-        df = fix_date_format_df(df, "Date", "%d/%m/%Y %H:%M:%S")
-    return df
-
-
-def remove_mismatch_rows(df, columns):
-    indices_to_drop = []
-    for index, row in df.iterrows():
-        drop_index = False
-        for each_col in columns:
-            if each_col == "NeuCoins":
-                continue
-            if each_col not in row:
-                drop_index = True
-                break
-            elif each_col == "Date":
-                if (row[each_col] == each_col or (isinstance(row[each_col], float) and math.isnan(row[each_col]))
-                        or
-                        not (is_valid_date(row[each_col], "%d/%m/%Y")
-                             or is_valid_date(row[each_col], "%d/%m/%Y %H:%M:%S"))
-                ):
-                    drop_index = True
-                    break
-        if drop_index:
-            indices_to_drop.append(index)
-    if indices_to_drop:
-        df.drop(indices_to_drop, inplace=True)
-    return df
-
-def remove_nan_columns(df):
-    # Check if all values in the last column are NaN
-    if df.iloc[:, -1].isna().all():
-        # Swap the last two columns
-        df.columns.values[-1], df.columns.values[-2] = df.columns.values[-2], df.columns.values[-1]
-        # Drop the last column
-        df.drop(columns=df.columns[-1], inplace=True)
-        return df, True
-    return df, False
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.StreamHandler(),
+        logging.FileHandler('hdfc_credit_card.log')
+    ]
+)
+logger = logging.getLogger(__name__)
 
 
-def clean(df, columns):
+def create_df(each_filename):
+    """Create and process DataFrame from CSV file with new HDFC format"""
+    df = pd.read_csv(each_filename, header=None)
     df = remove_empty_columns(df)
-    df = remove_empty_rows(df)
-    df = remove_mismatch_rows(df, columns)
-    pattern = re.compile(r'\b\d+(\.\d{1,2})?\b')
+    
+    # Process each row to extract transaction data
+    processed_rows = []
+    
     for index, row in df.iterrows():
-        df.at[index, 'Description'] = row["Transaction Description"]
-        if isinstance(row["Amount (in Rs.)"], str):
-            cr_dr = "cr" if "cr" in row["Amount (in Rs.)"].lower() else "dr"
-            match = re.match(pattern, row["Amount (in Rs.)"].replace(",", ""))
-            if match.groups() is not None:
-                amt = match.group(0)
-                df.at[index, 'Amount'] = float(amt)
-                df.at[index, 'Debit / Credit'] = cr_dr
-        else:
-            df.at[index, 'Amount'] = float(row["Amount (in Rs.)"])
-            df.at[index, 'Debit / Credit'] = "Debit"
-    remove_named_columns(df, ["Transaction Description", "Amount (in Rs.)"])
-    return df
+        # Get the raw string from the first column
+        raw_string = str(row[0]) if len(row) > 0 else ""
+        
+        # Skip empty rows
+        if not raw_string or raw_string.strip() == "":
+            continue
+            
+        try:
+            # Cleanup
+            cleaned_string = raw_string.replace("SANAPALLI LOKESH", "").replace("\r", "")
+            
+            # Extract transaction date
+            date_pattern = r'(\d{2}/\d{2}/\d{4})\s*\|\s*(\d{2}:\d{2})'
+            date_match = re.search(date_pattern, cleaned_string)
+            
+            if not date_match:
+                logger.error(f"Could not find date pattern in string: {raw_string}")
+                continue
+                
+            date_str = date_match.group(1) + " " + date_match.group(2)
+            # Convert date format from DD/MM/YYYY HH:MM to YYYY-MM-DD HH:MM:SS
+            try:
+                formatted_date = convert_date_format(date_str, "%d/%m/%Y %H:%M", "%Y-%m-%d %H:%M:%S")
+            except:
+                logger.error(f"Could not convert date format for: {date_str}")
+                continue
+            
+            # Remove date from string
+            cleaned_string = re.sub(date_pattern, "", cleaned_string).strip()
+            
+            # Extract transaction amount (take the last occurrence)
+            amount_pattern = r'([+-]?[\d,]+\.?\d*[l]?)'
+            amount_matches = re.findall(amount_pattern, cleaned_string)
+            
+            if not amount_matches:
+                logger.error(f"Could not find amount pattern in string: {raw_string}")
+                continue
+                
+            amount_str = amount_matches[-1]  # Take the last occurrence
+            # Remove 'l' suffix if present
+            amount_str = amount_str.rstrip('l')
+            # Remove commas and convert to float
+            try:
+                amount = float(amount_str.replace(',', ''))
+            except:
+                logger.error(f"Could not convert amount to float: {amount_str}")
+                continue
+            
+            # Determine transaction type based on + sign
+            txn_type = "Credit" if amount_str.startswith('+') else "Debit"
+            # Remove + sign for amount calculation
+            if amount_str.startswith('+'):
+                amount = abs(amount)
+            
+            # Remove the last amount occurrence from string
+            # Find the last occurrence and remove it
+            last_amount_match = re.search(amount_pattern + r'(?!.*' + amount_pattern + r')', cleaned_string)
+            if last_amount_match:
+                cleaned_string = cleaned_string[:last_amount_match.start()] + cleaned_string[last_amount_match.end():]
+            cleaned_string = cleaned_string.strip()
+            
+            # Remaining string is transaction description
+            description = cleaned_string.strip()
+            
+            # Create processed row with proper columns
+            processed_rows.append({
+                "Date": formatted_date,
+                "Description": description,
+                "Amount": amount,
+                "Debit / Credit": txn_type
+            })
+            
+        except Exception as e:
+            logger.exception(f"Error processing row {index}: {raw_string}")
+            continue
+    
+    # Create new DataFrame with processed data
+    processed_df = pd.DataFrame(processed_rows)
+    processed_df.to_csv(each_filename, index=False, header=False)
+    return processed_df
 
 
-def hdfc_credit_card_adapter_old(filename, output):
-    # Read the CSV file into a DataFrame
-    df = pd.read_csv(filename, header=None, on_bad_lines='skip')
-    df, is_modified = remove_nan_columns(df)
-    old_columns = ["Date", "Transaction Description", "Amount (in Rs.)"]
-    df.columns = old_columns
-    df = clean(df, old_columns)
+def hdfc_credit_card_processor(filename, output):
+    # Process the file with new format and get cleaned DataFrame
+    df = create_df(filename)
     columns = ["Date", "Description", "Amount", "Debit / Credit"]
-    df = hdfc_cc_fix_date_format_df(df)
     result = []
     for index, row in df.iterrows():
         if "cr" not in row[columns[3]].lower():
@@ -110,76 +135,15 @@ def hdfc_credit_card_adapter_old(filename, output):
                 }
             )
     write_result(output, result)
-    temp_file_name, _ = os.path.splitext(filename)
-    modified_filename = "%s_modified.csv" % temp_file_name
-    write_result_df(modified_filename, df)
 
 
 def hdfc_credit_card_adapter(filename, output):
     if check_file_type(filename) == "CSV":
-        hdfc_credit_card_adapter_old(filename, output)
+        hdfc_credit_card_processor(filename, output)
     elif check_file_type(filename) == "PDF":
         unlock_pdf(filename, "HDFC_CREDIT_CARD_PASSWORD")
-        for each_filename in extract_tables_from_pdf(filename, [413, 16, 670, 594], [49, 10, 629, 601], "lattice"):
+        for each_filename in extract_tables_from_pdf(filename, [680, 162, 680+144, 162+418], [262, 18, 262+257, 18+561], "lattice"):
             try:
-                df = pd.read_csv(each_filename, header=None)
-                # Drop the first row
-                df = df.drop(0)
-                df = remove_empty_columns(df)
-                df.to_csv(each_filename, index=False, header=False)
-                temp_file_name, _ = os.path.splitext(each_filename)
-                output_file = "%s_output.csv" % temp_file_name
-                hdfc_credit_card_adapter_old(each_filename, output_file)
+                hdfc_credit_card_processor(each_filename, output)
             except Exception:
-                print(f"Exception in processing file {each_filename}. Skipping... Exception={traceback.format_exc()}")
-
-
-def hdfc_upi_credit_card_adapter_old(filename, output):
-    # Read the CSV file into a DataFrame
-    old_columns = ["Date", "Transaction Description", "NeuCoins", "Amount (in Rs.)"]
-    df = pd.read_csv(filename, header=None, on_bad_lines="skip")
-    df = remove_empty_columns(df)
-    df = remove_empty_rows(df)
-    df.columns = old_columns
-    df = clean(df, old_columns)
-    df = hdfc_cc_fix_date_format_df(df)
-    df = hdfc_cc_upi_fix_date_format_df(df)
-    columns = ["Date", "Description", "Amount", "Debit / Credit"]
-    result = []
-    for index, row in df.iterrows():
-        if "cr" not in row[columns[3]].lower():
-            category, tags, notes = auto_detect_category(row[columns[1]])
-            result.append(
-                {
-                    "txn_date": row[columns[0]],
-                    "account": "HDFC Credit Card",
-                    "txn_type": "Debit",
-                    "txn_amount": parse_str_to_float(row[columns[2]]),
-                    "category": category,
-                    "tags": tags,
-                    "notes": notes,
-                }
-            )
-    write_result(output, result)
-    temp_file_name, _ = os.path.splitext(filename)
-    modified_filename = "%s_modified.csv" % temp_file_name
-    write_result_df(modified_filename, df)
-
-
-def hdfc_upi_credit_card_adapter(filename, output):
-    if check_file_type(filename) == "CSV":
-        hdfc_upi_credit_card_adapter_old(filename, output)
-    elif check_file_type(filename) == "PDF":
-        unlock_pdf(filename, "HDFC_CREDIT_CARD_PASSWORD")
-        for each_filename in extract_tables_from_pdf(filename, [413, 16, 670, 594], [53, 16, 648, 594], "lattice"):
-            try:
-                df = pd.read_csv(each_filename, header=None)
-                # Drop the first row
-                df = df.drop(0)
-                df = remove_empty_columns(df)
-                df.to_csv(each_filename, index=False, header=False)
-                temp_file_name, _ = os.path.splitext(each_filename)
-                output_file = "%s_output.csv" % temp_file_name
-                hdfc_upi_credit_card_adapter_old(each_filename, output_file)
-            except Exception:
-                print(f"Exception in processing file {each_filename}. Skipping... Exception={traceback.format_exc()}")
+                logger.exception(f"Exception in processing file {each_filename}. Skipping...")

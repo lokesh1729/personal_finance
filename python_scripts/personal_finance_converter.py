@@ -15,8 +15,6 @@ def bank_account_adapter(account_type):
         return sbi2_credit_card_adapter
     elif account_type == Account.HDFC_CREDIT_CARD.name:
         return hdfc_credit_card_adapter
-    elif account_type == Account.HDFC_UPI_CREDIT_CARD.name:
-        return hdfc_upi_credit_card_adapter
     elif account_type == Account.KOTAK_CREDIT_CARD.name:
         return kotak_credit_card_adapter
     elif account_type == Account.ICICI_CREDIT_CARD.name:
