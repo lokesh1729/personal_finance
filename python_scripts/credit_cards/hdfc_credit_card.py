@@ -63,8 +63,15 @@ def create_df(each_filename):
             # Remove date from string
             cleaned_string = re.sub(date_pattern, "", cleaned_string).strip()
             
+            # Check for credit transaction pattern
+            credit_pattern = r'\+\s{2}C'
+            is_credit = bool(re.search(credit_pattern, cleaned_string))
+            
+            # Remove credit pattern from string
+            cleaned_string = re.sub(credit_pattern, "", cleaned_string).strip()
+            
             # Extract transaction amount (take the last occurrence)
-            amount_pattern = r'([+-]?[\d,]+\.?\d*[l]?)'
+            amount_pattern = r'([\d,]+\.?\d*[l]?)'
             amount_matches = re.findall(amount_pattern, cleaned_string)
             
             if not amount_matches:
@@ -81,11 +88,8 @@ def create_df(each_filename):
                 logger.error(f"Could not convert amount to float: {amount_str}")
                 continue
             
-            # Determine transaction type based on + sign
-            txn_type = "Credit" if amount_str.startswith('+') else "Debit"
-            # Remove + sign for amount calculation
-            if amount_str.startswith('+'):
-                amount = abs(amount)
+            # Determine transaction type
+            txn_type = "Credit" if is_credit else "Debit"
             
             # Remove the last amount occurrence from string
             # Find the last occurrence and remove it
