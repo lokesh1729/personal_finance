@@ -125,13 +125,13 @@ def hdfc_credit_card_processor(filename, output):
     columns = ["Date", "Description", "Amount", "Debit / Credit"]
     result = []
     for index, row in df.iterrows():
-        if "cr" not in row[columns[3]].lower():
+        if row[columns[3]] == "Debit":
             category, tags, notes = auto_detect_category(row[columns[1]])
             result.append(
                 {
                     "txn_date": row[columns[0]],
                     "account": "HDFC Credit Card",
-                    "txn_type": "Debit",
+                    "txn_type": row[columns[3]],
                     "txn_amount": parse_str_to_float(row[columns[2]]),
                     "category": category,
                     "tags": tags,
