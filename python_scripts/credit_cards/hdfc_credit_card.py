@@ -1,4 +1,5 @@
 import logging
+import os
 import re
 import pandas as pd
 
@@ -115,7 +116,13 @@ def create_df(each_filename):
     
     # Create new DataFrame with processed data
     processed_df = pd.DataFrame(processed_rows)
-    processed_df.to_csv(each_filename, index=False, header=False)
+    
+    # Create intermediate modified file
+    df.to_csv(each_filename, index=False, header=False)
+    temp_file_name, _ = os.path.splitext(each_filename)
+    modified_file = "%s_modified.csv" % temp_file_name
+    processed_df.to_csv(modified_file, index=False, header=False)
+    
     return processed_df
 
 
@@ -148,6 +155,8 @@ def hdfc_credit_card_adapter(filename, output):
         unlock_pdf(filename, "HDFC_CREDIT_CARD_PASSWORD")
         for each_filename in extract_tables_from_pdf(filename, [680, 162, 680+144, 162+418], [262, 18, 262+257, 18+561], "lattice"):
             try:
-                hdfc_credit_card_processor(each_filename, output)
+                temp_file_name, _ = os.path.splitext(each_filename)
+                output_file = "%s_output.csv" % temp_file_name
+                hdfc_credit_card_processor(each_filename, output_file)
             except Exception:
                 logger.exception(f"Exception in processing file {each_filename}. Skipping...")
