@@ -2,6 +2,7 @@ import argparse
 
 from bank_accounts import *
 from credit_cards import *
+from credit_cards.hdfc_tata_neu_credit_card import hdfc_tata_neu_credit_card_adapter
 
 
 def bank_account_adapter(account_type):
@@ -15,6 +16,8 @@ def bank_account_adapter(account_type):
         return sbi2_credit_card_adapter
     elif account_type == Account.HDFC_CREDIT_CARD.name:
         return hdfc_credit_card_adapter
+    elif account_type == Account.HDFC_TATA_NEU_CREDIT_CARD.name:
+        return hdfc_tata_neu_credit_card_adapter
     elif account_type == Account.KOTAK_CREDIT_CARD.name:
         return kotak_credit_card_adapter
     elif account_type == Account.ICICI_CREDIT_CARD.name:

@@ -33,6 +33,8 @@ netflix,Entertainment,#Subscription,
 pvrcinemas,Entertainment,,movies
 bookmyshow,Entertainment,#BookMyShow,movies
 book my show,Entertainment,#BookMyShow,movies
+BigtreeEntertainment,Entertainment,#BookMyShow,movies
+Big Tree Entertainment,Entertainment,#BookMyShow,movies
 cinepolis,Entertainment,,cinepolis
 hotstar,Entertainment,#Subscription,hotstar subscription
 entertainment,Entertainment,,
@@ -99,6 +101,7 @@ InnovativeRetailConceptBangalore,Groceries,#Bigbasket,
 dmart,Groceries,#dmart,
 KPN FARM FRESH,Groceries,#KPNFresh,
 KpnFarmFreshPvtLtd,Groceries,#KPNFresh,
+KPN FF,Groceries,#KPNFresh,
 SWIGGY.STORES,Groceries,#SwiggyInstamart,
 swiggy instamart,Groceries,#SwiggyInstamart,
 FRESHALICIOUS,Groceries,#FthDaily
