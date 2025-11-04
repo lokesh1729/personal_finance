@@ -1,3 +1,6 @@
+research_papers/
+.cursor/
+misc/
 statements/
 sql/dbeaver.txt
 # Created by https://www.toptal.com/developers/gitignore/api/python,sublimetext

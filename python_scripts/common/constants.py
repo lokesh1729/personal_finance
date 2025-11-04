@@ -16,3 +16,4 @@ class Account(Enum):
     IDFC_BANK_ACCOUNT = 10
     FASTAG_WALLET = 11
     SBI2_CREDIT_CARD = 12
+    SBI3_CREDIT_CARD = 13

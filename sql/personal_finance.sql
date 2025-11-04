@@ -437,6 +437,10 @@ WHERE tags ~ '#[0-9]+';
 
 
 
+select distinct tags from transactions where tags ilike '%#adhocloan%';
+
+
+
 
 
 

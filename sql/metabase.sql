@@ -14,3 +14,21 @@ WHERE rc.archived is false and rc.name not in ('Categories', 'Transactions with 
 ORDER BY rc.name;
 
 
+
+
+SELECT id, dashboard_id, name 
+FROM dashboard_tab 
+WHERE dashboard_id = 6 AND name = 'Adhoc Loan';
+
+
+
+UPDATE report_dashboardcard 
+SET 
+    dashboard_id = 36,
+    dashboard_tab_id = (
+        SELECT id 
+        FROM dashboard_tab 
+        WHERE dashboard_id = 36 AND name = 'Interesting Insights' 
+        LIMIT 1
+    )
+WHERE dashboard_id = 29;

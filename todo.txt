@@ -31,6 +31,12 @@
 	- TODO import to transactions table
 	- TODO import to sbi_credit_card table
 	- TODO pay credit card bill
+- TODO SBI Credit Card 3
+	- TODO run the script
+	- TODO validate remaining transactions
+	- TODO import to transactions table
+	- TODO import to sbi_credit_card table
+	- TODO pay credit card bill
 - TODO ICICI Credit Card
 	- TODO validate remaining transactions
 	- TODO import to transactions table

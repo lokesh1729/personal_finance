@@ -111,6 +111,7 @@ medicine,Health,,
 jas dento,Health,,dentist
 ayurveda,Health,,ayurveda
 hospital,Health,,
+QIKWELL,Health,#Practo,
 amma,Household,,for amma paltheru
 household,Household,,
 pooja,Household,#pooja,
@@ -145,6 +146,7 @@ cashmycar,Misc,,olx
 parking,Misc,,
 emergency fund,Others,#MonthlyBuffer,short term - monthly buffer & emergency fund
 house goal,Others,#MonthlyBuffer,
+AMAZONPAYBALANCELOAD,Others,#AmazonPayWalletReload,amazon pay wallet reload
 salon,Personal Care,,
 hair cut,Personal Care,,
 footwear,Personal Care,,
@@ -161,6 +163,7 @@ flipkart,Shopping,#Flipkart,
 meesho,Shopping,#Meesho,
 dress circle,Shopping,,clothes shopping
 reliance retail,Shopping,#Ajio,clothes shopping
+myntra,Shopping,#Myntra,clothes shopping
 klm fashion,Shopping,,clothes shopping
 FASTAG,Travel,#Fastag,
 auto,Travel,,
