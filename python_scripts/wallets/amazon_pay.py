@@ -1,5 +1,7 @@
 import argparse
+import json
 import os
+import re
 import time
 from datetime import datetime
 
@@ -42,7 +44,13 @@ def parse_netscape_cookies(filename):
                     domain = fields[0]
                     path = fields[2]
                     secure = fields[3].lower() == 'true'
-                    expiry = int(fields[4]) if fields[4] != '0' else None
+                    # Handle expiry as float or int (convert to int for timestamp)
+                    expiry = None
+                    if fields[4] != '0':
+                        try:
+                            expiry = int(float(fields[4]))
+                        except (ValueError, TypeError):
+                            expiry = None
                     name = fields[5]
                     value = fields[6]
 
@@ -208,6 +216,22 @@ def parse_date(date_str):
 
 def insert_transaction(conn, txn_data):
     """Insert a transaction into the database."""
+    
+    def parse_order_id_from_html(order_id_str):
+        """Parse orderId from HTML link if present, otherwise return as is."""
+        if not order_id_str:
+            return None
+        
+        # Check if it's HTML (contains <a> tag)
+        if '<a' in order_id_str and '</a>' in order_id_str:
+            # Extract text content between <a> tags using regex
+            match = re.search(r'<a[^>]*>([^<]+)</a>', order_id_str)
+            if match:
+                return match.group(1).strip()
+        
+        # If not HTML, return as is
+        return order_id_str.strip() if order_id_str else None
+    
     try:
         # Create a cursor
         cursor = conn.cursor()
@@ -226,6 +250,23 @@ def insert_transaction(conn, txn_data):
         # Prepare notes
         category, tags, notes = utils.auto_detect_category(txn_data['transaction_details'])
         notes = f"subwallet: {txn_data['subwallet']}\n\n{txn_data['transaction_details']}\n\n" + notes
+        
+        # Parse and append orderId to notes if available
+        order_id = txn_data.get('orderId')
+        if order_id:
+            parsed_order_id = parse_order_id_from_html(order_id)
+            if parsed_order_id:
+                notes += f"\norderId: {parsed_order_id}"
+        if txn_data.get('usecase'):
+            notes += f"\nusecase: {txn_data['usecase']}"
+        
+        # If category is cashback, txn_amount should be positive
+        if category and category.lower() == 'cashback':
+            txn_amount = abs(txn_amount)
+        
+        # If notes contain refund, txn_amount should be negative
+        if 'refund' in notes.lower():
+            txn_amount = -abs(txn_amount)
 
         # SQL for inserting a transaction
         insert_sql = """
@@ -276,9 +317,28 @@ def process_transactions(driver, conn):
 
     try:
         # Wait for the transactions container to load
-        transactions_container = WebDriverWait(driver, 20).until(
-            EC.presence_of_element_located((By.ID, "transactions-desktop"))
-        )
+        try:
+            transactions_container = WebDriverWait(driver, 20).until(
+                EC.presence_of_element_located((By.ID, "transactions-desktop"))
+            )
+        except Exception:
+            # If transactions container not found, check for "Switch accounts" page
+            print("Transactions container not found, checking for 'Switch accounts' page...")
+            driver.save_screenshot("amazon_pay_txns_not_found.png")
+            switch_accounts_h1 = WebDriverWait(driver, 10).until(
+                EC.presence_of_element_located((By.XPATH, "//h1[text()='Switch accounts']"))
+            )
+            print("Found 'Switch accounts' page, clicking on customer name...")
+            customer_name_div = driver.find_element(By.CSS_SELECTOR, "div[data-test-id='customerName']")
+            customer_name_div.click()
+            print("Clicked on customer name. Waiting 5 seconds...")
+            time.sleep(5)
+            # Wait again for transactions-desktop
+            driver.save_screenshot("amazon_pay_after_clicking_on_switch_accounts.png")
+            transactions_container = WebDriverWait(driver, 20).until(
+                EC.presence_of_element_located((By.ID, "transactions-desktop"))
+            )
+            print("Transaction container found after switching accounts.")
 
         print("Transaction container found. Processing transactions...")
 
@@ -312,12 +372,29 @@ def process_transactions(driver, conn):
                         amount = elem.find_element(By.XPATH,
                                                    ".//span[@class='a-size-medium a-color-price']").text.strip()
 
+                    # Extract JSON from data-itemdetailexpandedview attribute
+                    orderId = None
+                    usecase = None
+                    marketplaceId = None
+                    try:
+                        json_data_str = elem.get_attribute("data-itemdetailexpandedview")
+                        if json_data_str:
+                            json_data = json.loads(json_data_str)
+                            orderId = json_data.get("orderId")
+                            usecase = json_data.get("useCase")
+                            marketplaceId = json_data.get("marketplaceId")
+                    except (json.JSONDecodeError, AttributeError) as e:
+                        print(f"Error extracting JSON data: {e}")
+
                     # Create transaction data dictionary
                     txn_data = {
                         "transaction_details": transaction_details,
                         "subwallet": subwallet,
                         "date_time": date_time,
-                        "amount": amount
+                        "amount": amount,
+                        "orderId": orderId,
+                        "usecase": usecase,
+                        "marketplaceId": marketplaceId
                     }
 
                     print(f"Fetched Transaction: {transaction_details} | {amount} | {date_time}")
@@ -356,7 +433,7 @@ def process_transactions(driver, conn):
 
     except Exception as e:
         print(f"Error processing transactions: {e}")
-        driver.save_screenshot("error_transactions.png")
+        driver.save_screenshot("amazon_pay_error_process_transactions.png")
         return 0
 
 
@@ -391,18 +468,13 @@ def main():
         inject_cookies(driver, cookies)
 
         # Navigate to the payment statement page
-        target_url = "https://www.amazon.in/pay/history?tab=ALL&filter={%22searchWords%22:[],%22paymentInstruments%22:[{%22paymentInstrumentType%22:%22GC%22},{%22paymentInstrumentType%22:%22SVA%22},{%22paymentInstrumentType%22:%22APV%22}],%22dateRanges%22:[{%22from%22:%222025-04-27%22,%22to%22:%222025-06-01%22}]}"
+        target_url = "https://www.amazon.in/pay/history?tab=ALL&filter={%22searchWords%22:[],%22paymentInstruments%22:[{%22paymentInstrumentType%22:%22GC%22},{%22paymentInstrumentType%22:%22SVA%22},{%22paymentInstrumentType%22:%22APV%22}]}"
         print(f"Navigating to {target_url}")
         driver.get(target_url)
 
         # Wait to ensure the page loads properly
         print(f"Waiting {args.wait_time} seconds for page to load...")
         time.sleep(args.wait_time)
-
-        # Take a screenshot for verification
-        screenshot_file = "amazon_payment_statement.png"
-        driver.save_screenshot(screenshot_file)
-        print(f"Screenshot saved as {screenshot_file}")
 
         # Print current URL (to check if redirected)
         print(f"Current URL: {driver.current_url}")
@@ -417,7 +489,7 @@ def main():
 
     except Exception as e:
         print(f"An error occurred: {e}")
-        driver.save_screenshot("error.png")
+        driver.save_screenshot("amazon_pay_error.png")
 
     finally:
         # Close database connection if it exists
