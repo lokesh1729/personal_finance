@@ -18,17 +18,22 @@ ORDER BY rc.name;
 
 SELECT id, dashboard_id, name 
 FROM dashboard_tab 
-WHERE dashboard_id = 6 AND name = 'Adhoc Loan';
+WHERE dashboard_id = 26 AND name = 'Dropshipping';
 
 
 
 UPDATE report_dashboardcard 
 SET 
-    dashboard_id = 36,
+    dashboard_id = 26,
     dashboard_tab_id = (
         SELECT id 
         FROM dashboard_tab 
-        WHERE dashboard_id = 36 AND name = 'Interesting Insights' 
+        WHERE dashboard_id = 26 AND name = 'Dropshipping' 
         LIMIT 1
     )
-WHERE dashboard_id = 29;
+WHERE dashboard_id = 8;
+
+
+
+
+

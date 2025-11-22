@@ -16,30 +16,31 @@ def backup_database(
     db_name, schema_name
 ):
     timestamp = datetime.now().strftime("%Y_%m_%d_%H_%M")
-    backup_filename = f"dump_{db_name}_{schema_name}_{timestamp}.gz"
+    backup_filename = f"dump_{db_name}_{schema_name}_{timestamp}.tar"
 
     dump_cmd = [
         PG_DUMP_PATH,
         "-h", db_host,
         "-p", str(db_port),
         "-U", db_user,
+        "-F", "t",  # TAR format
+        "-f", backup_filename,
         "-n", schema_name,
         db_name
     ]
 
     print(f"Backing up schema '{schema_name}' from database '{db_name}'...")
-    with open(backup_filename, "wb") as f_out:
-        proc = subprocess.Popen(
-            dump_cmd,
-            stdout=subprocess.PIPE,
-            env={**os.environ, "PGPASSWORD": db_password}
-        )
-        with gzip.GzipFile(fileobj=f_out, mode="wb") as gz_out:
-            shutil.copyfileobj(proc.stdout, gz_out)
-        proc.wait()
+    result = subprocess.run(
+        dump_cmd,
+        env={**os.environ, "PGPASSWORD": db_password},
+        capture_output=True,
+        text=True
+    )
 
-    if proc.returncode != 0:
-        raise RuntimeError(f"pg_dump failed for {db_name}:{schema_name}")
+    if result.returncode != 0:
+        raise RuntimeError(
+            f"pg_dump failed for {db_name}:{schema_name}: {result.stderr.strip()}"
+        )
     print(f"✅ Backup saved to {backup_filename}")
 
 
