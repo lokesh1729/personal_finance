@@ -52,7 +52,7 @@ def clean_rows(df):
 
 
 def sbi_credit_card_adapter_old(filename, out_filename):
-    extra_empty_column = False
+    extra_empty_column = True
     # Read the CSV file into a DataFrame
     if extra_empty_column:
         columns = ["Date", "", "Transaction Details", "Amount", "Type"]
@@ -119,6 +119,25 @@ def sbi2_credit_card_adapter(filename, output):
     elif check_file_type(filename) == "PDF":
         unlock_pdf(filename, "SBI2_CREDIT_CARD_PASSWORD")
         for each_filename in extract_tables_from_pdf(filename, [430, 16, 669, 428], [430, 16, 669, 428], "stream"):
+            try:
+                df = pd.read_csv(each_filename, header=None)
+                # Drop the first row
+                df = df.drop(0)
+                df = remove_empty_columns(df)
+                df.to_csv(each_filename, index=False, header=False)
+                temp_file_name, _ = os.path.splitext(each_filename)
+                output_file = "%s_output.csv" % temp_file_name
+                sbi_credit_card_adapter_old(each_filename, output_file)
+            except Exception:
+                print(f"Exception in processing file {each_filename}. Skipping... Exception={traceback.format_exc()}")
+
+
+def sbi3_credit_card_adapter(filename, output):
+    if check_file_type(filename) == "CSV":
+        sbi_credit_card_adapter_old(filename, output)
+    elif check_file_type(filename) == "PDF":
+        unlock_pdf(filename, "SBI3_CREDIT_CARD_PASSWORD")
+        for each_filename in extract_tables_from_pdf(filename, [430, 16, 340+241, 190+408], [430, 16, 340+241, 190+408], "stream"):
             try:
                 df = pd.read_csv(each_filename, header=None)
                 # Drop the first row

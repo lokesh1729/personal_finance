@@ -13,13 +13,16 @@ from common import (
 from common.csv_utils import convert_date_format
 from common.pdf import unlock_pdf, extract_tables_from_pdf
 
+# Ensure logs directory exists
+os.makedirs('logs', exist_ok=True)
+
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     handlers=[
         logging.StreamHandler(),
-        logging.FileHandler('hdfc_credit_card.log')
+        logging.FileHandler('logs/hdfc_tata_neu_credit_card.log')
     ]
 )
 logger = logging.getLogger(__name__)

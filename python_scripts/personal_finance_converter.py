@@ -15,7 +15,7 @@ def bank_account_adapter(account_type):
     elif account_type == Account.SBI2_CREDIT_CARD.name:
         return sbi2_credit_card_adapter
     elif account_type == Account.SBI3_CREDIT_CARD.name:
-        return sbi2_credit_card_adapter
+        return sbi3_credit_card_adapter
     elif account_type == Account.HDFC_CREDIT_CARD.name:
         return hdfc_credit_card_adapter
     elif account_type == Account.HDFC_TATA_NEU_CREDIT_CARD.name:
@@ -26,6 +26,8 @@ def bank_account_adapter(account_type):
         return icici_credit_card_adapter
     elif account_type == Account.EQUITAS_BANK_ACCOUNT.name:
         return equitas_bank_account_adapter
+    elif account_type == Account.AXIS_CREDIT_CARD.name:
+        return axis_credit_card_adapter
 
 
 def main():

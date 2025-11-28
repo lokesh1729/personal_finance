@@ -4,6 +4,7 @@ import os
 
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 
 
@@ -148,16 +149,20 @@ def check_csv_header_df(df: pd.DataFrame, header_name: str) -> bool:
 
 def remove_empty_columns(df):
     """
-    Reads a CSV file and removes any empty columns.
+    Remove columns that contain only nulls or empty strings.
 
     Parameters:
-    file_path (str): The path to the CSV file.
+    df (pd.DataFrame): DataFrame to clean.
 
     Returns:
-    pd.DataFrame: A DataFrame with empty columns removed.
+    pd.DataFrame: DataFrame with empty columns removed.
     """
-    # Remove empty columns
-    return df.dropna(axis=1, how="all")
+    # Treat empty-string cells as NaN for the purpose of column pruning
+    cleaned_df = df.replace(r"^\s*$", np.nan, regex=True)
+    empty_columns = cleaned_df.columns[cleaned_df.isna().all(axis=0)]
+    if len(empty_columns) == 0:
+        return df
+    return df.drop(columns=empty_columns)
 
 
 def remove_empty_rows(df):

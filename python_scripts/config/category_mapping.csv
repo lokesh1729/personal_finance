@@ -15,7 +15,9 @@ water bill,Bills,,water bill
 drinkprime,Bills,,water bill
 VODAFONEIDEA,Bills,,vodafone recharge
 rewards earned,Cashback,,icici amazon pay cashback
+cashkaro,Cashback,#Cashkaro,cashback
 cashback,Cashback,,cashback
+refund from amazon,Shopping,#Amazon,
 refund,Refund,,
 dlocal,Donation,,wikipedia
 eggs,Egg & Meat,,
@@ -63,6 +65,7 @@ paradise food,Food & Dining,,
 coffee,Food & Dining,,
 bakery,Food & Dining,,
 juice,Food & Dining,,
+eazydiner,Food & Dining,#EazyDiner,
 veggie,Fruits & Vegetables,,
 veggies,Fruits & Vegetables,,
 vegetable,Fruits & Vegetables,,
@@ -85,6 +88,7 @@ fuelling,Fuel,,
 groceries,Groceries,,
 grocery,Groceries,,
 bigbasket,Groceries,#Bigbasket,
+big basket,Groceries,#Bigbasket,
 innovative retail,Groceries,#Bigbasket,
 bbnow,Groceries,#Bigbasket,
 geddit,Groceries,#Zepto,
@@ -144,21 +148,24 @@ toys,Misc,,
 bharatpe,Misc,,
 cashmycar,Misc,,olx
 parking,Misc,,
+joining fee,Misc,,credit card joining fee
 emergency fund,Others,#MonthlyBuffer,short term - monthly buffer & emergency fund
 house goal,Others,#MonthlyBuffer,
 AMAZONPAYBALANCELOAD,Others,#AmazonPayWalletReload,amazon pay wallet reload
 salon,Personal Care,,
 hair cut,Personal Care,,
 footwear,Personal Care,,
-hetzner,Productivity,,hetzner
-apple,Productivity,#apple #subscription,
-namecheap,Productivity,,
-zoho,Productivity,,
+hetzner,Productivity,#Hetzner,hetzner
+apple,Productivity,#Apple #Subscription,
+namecheap,Productivity,#Namecheap,
+zoho,Productivity,#Zoho,
+excalidraw,Productivity,#Excalidraw,
 rent,Rent,,
 whizdm innovations,Salary,,
 whizdm,Salary,,
 shopping,Shopping,,
 ajio,Shopping,#Ajio,
+amazon,Shopping,#Amazon,
 flipkart,Shopping,#Flipkart,
 meesho,Shopping,#Meesho,
 dress circle,Shopping,,clothes shopping
@@ -177,3 +184,4 @@ indian railway,Travel,#irctc,train tickets
 travel,Travel,,
 indigo,Travel,,flight tickets
 abhibus,Travel,#AbhiBus,bus tickets
+cleartrip,Travel,#ClearTrip,cleartrip
