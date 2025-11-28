@@ -108,7 +108,10 @@ def create_df(each_filename):
             
             # Determine transaction type
             txn_type = "Credit" if is_credit else "Debit"
-            
+
+            # Credit rows should carry negative amounts upfront
+            amount = -abs(amount) if txn_type == "Credit" else abs(amount)
+
             processed_rows.append({
                 "Date": formatted_date,
                 "Description": description,
