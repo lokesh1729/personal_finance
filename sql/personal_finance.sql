@@ -29,6 +29,8 @@ where
 )
 	and "Date" > '2024-11-01';
 
+
+
 select
 	distinct "Chq./Ref.No."
 from
@@ -443,9 +445,68 @@ select distinct tags from transactions where tags ilike '%#adhocloan%';
 
 
 
+SELECT *
+FROM transactions
+WHERE txn_date = '2025-09-25'
+  AND tags ILIKE '%#AppleWatch%';
 
 
 
+
+
+
+
+
+SELECT id, txn_date, txn_amount 
+    FROM transactions 
+    WHERE txn_date >= '2020-11-25' 
+      AND account = 'Cash' 
+      AND txn_type = 'Debit' 
+      AND category != 'Others'
+      AND (tags IS NULL OR tags = '' OR tags NOT LIKE '%#%%#')
+    ORDER BY txn_date, id;
+
+
+
+
+SELECT id, tags
+FROM transactions
+WHERE tags ~ '.*#[0-9]+#.*#[0-9]+#';
+
+
+
+
+-- 1. 9 Nov 2025: Travel - Auto
+INSERT INTO public.transactions (txn_date, account, txn_type, txn_amount, category, tags, notes)
+VALUES ('2025-11-09', 'Cash', 'Debit', 250, 'Travel', '#13084#', 'auto');
+
+-- 2. 9 Nov 2025: Travel - Tip
+INSERT INTO public.transactions (txn_date, account, txn_type, txn_amount, category, tags, notes)
+VALUES ('2025-11-09', 'Cash', 'Debit', 50, 'Travel', '#13084#', 'tip');
+
+-- 3. 8 Nov 2025: Travel - Porter
+INSERT INTO public.transactions (txn_date, account, txn_type, txn_amount, category, tags, notes)
+VALUES ('2025-11-08', 'Cash', 'Debit', 600, 'Travel', '#13084#', 'porter');
+
+-- 4. 10 Nov 2025: Food & Dining
+INSERT INTO public.transactions (txn_date, account, txn_type, txn_amount, category, tags, notes)
+VALUES ('2025-11-10', 'Cash', 'Debit', 500, 'Food & Dining', '#13084#', 'Satya Sai drinks');
+
+-- 5. 11 Nov 2025: Others
+INSERT INTO public.transactions (txn_date, account, txn_type, txn_amount, category, tags, notes)
+VALUES ('2025-11-11', 'Cash', 'Debit', 10000, 'Others', '#13084#', 'given to Rupa, got them in bank');
+
+-- 6. 14 Nov 2025: ATM Withdrawal (Credit/Inflow)
+INSERT INTO public.transactions (txn_date, account, txn_type, txn_amount, category, tags, notes)
+VALUES ('2025-11-14', 'Cash', 'Credit', 1000, 'ATM Withdrawal', '', 'taken from babai and used card for fuel');
+
+-- 7. 18 Nov 2025: Travel - Bus Ticket
+INSERT INTO public.transactions (txn_date, account, txn_type, txn_amount, category, tags, notes)
+VALUES ('2025-11-18', 'Cash', 'Debit', 600, 'Travel', '', 'bus ticket - Tuni to Vizag');
+
+-- 8. 25 Nov 2025: Misc
+INSERT INTO public.transactions (txn_date, account, txn_type, txn_amount, category, tags, notes)
+VALUES ('2025-11-25', 'Cash', 'Debit', 700, 'Misc', '#13084#', 'rupa metal things');
 
 
 

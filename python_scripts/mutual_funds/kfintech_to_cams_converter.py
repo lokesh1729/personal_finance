@@ -1,3 +1,4 @@
+# TODO : write usage and description
 import os
 import argparse
 import xlrd

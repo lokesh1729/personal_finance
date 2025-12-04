@@ -7,6 +7,7 @@ Usage:
 2. Login with your mobile number and OTP (automation is tough because it has akamai bot manager and google ReCaptcha)
 3. Go to https://www.tataneu.com/home
 4. Open network tools ---> XHR ---> search for customer ---> copy token from authorization header
+5. Fill it in the .env file as TATA_NEU_AUTHORIZATION_TOKEN, TATA_NEU_CLIENT_ID, TATA_NEU_CLIENT_SECRET
 
 """
 import os

@@ -1,3 +1,4 @@
+# TODO : write usage and description
 import os
 import csv
 import psycopg2

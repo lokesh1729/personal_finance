@@ -126,8 +126,10 @@ snabbit,Household,#Snabbit,
 cable,Household,,cable bill
 equity mutual fund,Investments,#MutualFunds,long term - equity mutual funds
 smallcase stocks,Investments,#Stocks,long term - indian stocks
-adhoc stocks,Investments,#Stocks,long term - indian stocks
-us stocks,Investments,#USStocks,long term – us stocks
+zerodha,Investments,#Stocks #Zerodha,long term - indian stocks
+adhoc stocks,Investments,#Stocks #Zerodha,long term - indian stocks
+us stocks,Investments,#USStocks #IndMoney,long term – us stocks
+indmoney,Investments,#USStocks #IndMoney,long term – us stocks
 nps trust,Investments,,NPS
 stan chart bank,Investments,#EmergencyFund #PersonalLoan,tataji babai loan - emergency fund / house goal
 elss mutual funds,Investments,#MutualFunds,tax saving - ELSS mutual funds
@@ -172,11 +174,13 @@ dress circle,Shopping,,clothes shopping
 reliance retail,Shopping,#Ajio,clothes shopping
 myntra,Shopping,#Myntra,clothes shopping
 klm fashion,Shopping,,clothes shopping
+snitch,Shopping,#Snitch,
 FASTAG,Travel,#Fastag,
 auto,Travel,,
 cab,Travel,,
 OLACABS,Travel,#ola,
 rapido,Travel,#rapido,
+uber auto,Travel,#uber,
 uber,Travel,#uber,
 irctc,Travel,#irctc,
 namma yatri,Travel,,
