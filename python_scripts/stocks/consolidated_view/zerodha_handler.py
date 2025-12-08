@@ -72,11 +72,8 @@ def process_stock_holdings_file(file_path: str) -> List[Dict]:
         elif "Quantity" in row and pd.notna(row["Quantity"]):
             quantity = safe_float(row["Quantity"]) or 0.0
         
-        # Calculate Buy Value (Average Price * Quantity)
-        buy_value = 0.0
-        if "Average Price" in row and pd.notna(row["Average Price"]):
-            avg_price = safe_float(row["Average Price"]) or 0.0
-            buy_value = avg_price * quantity
+        # Extract Average Price
+        avg_price = safe_float(row.get("Average Price")) if "Average Price" in row else None
         
         # Extract ISIN - handle both "ISIN" and "ISINSector" columns
         isin_value = None
@@ -93,11 +90,9 @@ def process_stock_holdings_file(file_path: str) -> List[Dict]:
             "Symbol": str(row.get("Symbol", "")).strip(),
             "ISIN": isin_value if isin_value else None,
             "Quantity": quantity,
-            "Buy Value": buy_value,
-            "Sell Value": None,  # Not available in input
-            "Realized P&L": None,  # Not available in input
-            "Realized P&L Pct.": None,  # Not available in input
-            "Previous Closing Price": safe_float(row["Previous Closing Price"]) if "Previous Closing Price" in row else None
+            "Average Price": avg_price,
+            "Unrealized P&L": safe_float(row.get("Unrealized P&L")) if "Unrealized P&L" in row else None,
+            "Unrealized P&L Pct.": safe_float(row.get("Unrealized P&L Pct.")) if "Unrealized P&L Pct." in row else None
         }
         records.append(record)
     

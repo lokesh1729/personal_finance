@@ -2,6 +2,7 @@
 Database utilities for table creation, archival, and data insertion.
 """
 import os
+import re
 import psycopg2
 import random
 import string
@@ -17,6 +18,25 @@ logger = logging.getLogger(__name__)
 def generate_random_suffix(length: int = 6) -> str:
     """Generate a random alphanumeric suffix."""
     return ''.join(random.choices(string.ascii_lowercase + string.digits, k=length))
+
+
+def validate_identifier(name: str) -> str:
+    """
+    Validate that a string is a safe SQL identifier (table name, trigger name, etc.).
+    Only allows alphanumeric characters and underscores.
+    
+    Args:
+        name: The identifier to validate
+        
+    Returns:
+        The validated identifier
+        
+    Raises:
+        ValueError: If the identifier contains invalid characters
+    """
+    if not re.match(r'^[a-zA-Z_][a-zA-Z0-9_]*$', name):
+        raise ValueError(f"Invalid SQL identifier: '{name}'. Only alphanumeric characters and underscores are allowed.")
+    return name
 
 
 def get_db_connection():
@@ -76,6 +96,83 @@ def archive_table_if_exists(conn, table_name: str) -> str:
     return "archived"
 
 
+def ensure_trigger_function_exists(conn):
+    """
+    Ensure the trigger_set_timestamp function exists in the database.
+    Creates it if it doesn't exist.
+    """
+    cursor = conn.cursor()
+    
+    try:
+        # Check if the function exists
+        cursor.execute("""
+            SELECT EXISTS (
+                SELECT 1 FROM pg_proc 
+                WHERE proname = 'trigger_set_timestamp'
+            );
+        """)
+        
+        function_exists = cursor.fetchone()[0]
+        
+        if not function_exists:
+            # Create the function
+            cursor.execute("""
+                CREATE OR REPLACE FUNCTION public.trigger_set_timestamp()
+                RETURNS trigger
+                LANGUAGE plpgsql
+                AS $function$
+                BEGIN
+                    NEW.updated_at = NOW();
+                    RETURN NEW;
+                END;
+                $function$;
+            """)
+            logger.info("Created trigger function 'trigger_set_timestamp'")
+    finally:
+        cursor.close()
+
+
+def create_updated_at_trigger(conn, table_name: str):
+    """
+    Create a trigger on the specified table to automatically update the updated_at column.
+    Only creates the trigger if it doesn't already exist.
+    """
+    # Validate table_name to prevent SQL injection
+    validate_identifier(table_name)
+    
+    cursor = conn.cursor()
+    
+    try:
+        # Ensure the trigger function exists
+        ensure_trigger_function_exists(conn)
+        
+        trigger_name = f"set_timestamp_{table_name}"
+        
+        # Check if trigger already exists
+        cursor.execute("""
+            SELECT EXISTS (
+                SELECT 1 FROM pg_trigger
+                WHERE tgname = %s
+            );
+        """, (trigger_name,))
+        
+        trigger_exists = cursor.fetchone()[0]
+        
+        if trigger_exists:
+            logger.info(f"Trigger '{trigger_name}' already exists on table '{table_name}', skipping creation")
+            return
+        
+        # Create the trigger
+        cursor.execute(f"""
+            CREATE TRIGGER {trigger_name}
+            BEFORE UPDATE ON "{table_name}"
+            FOR EACH ROW EXECUTE FUNCTION trigger_set_timestamp();
+        """)
+        logger.info(f"Created trigger '{trigger_name}' on table '{table_name}'")
+    finally:
+        cursor.close()
+
+
 def create_stocks_portfolio_table(conn):
     """
     Create stocks_portfolio table with the specified schema.
@@ -99,11 +196,9 @@ def create_stocks_portfolio_table(conn):
         "Symbol" VARCHAR(50) NULL,
         "ISIN" VARCHAR(50) NULL,
         "Quantity" FLOAT4 NULL,
-        "Buy Value" FLOAT4 NULL,
-        "Sell Value" FLOAT4 NULL,
-        "Realized P&L" INT4 NULL,
-        "Realized P&L Pct." FLOAT4 NULL,
-        "Previous Closing Price" FLOAT4 NULL,
+        "Average Price" FLOAT4 NULL,
+        "Unrealized P&L" FLOAT4 NULL,
+        "Unrealized P&L Pct." FLOAT4 NULL,
         created_at TIMESTAMP DEFAULT NOW(),
         updated_at TIMESTAMP DEFAULT NOW(),
         CONSTRAINT stocks_portfolio_unique_{random_suffix} UNIQUE ("Symbol")
@@ -112,6 +207,9 @@ def create_stocks_portfolio_table(conn):
     
     cursor.execute(create_table_query)
     logger.info("Created table 'stocks_portfolio'")
+    
+    # Create trigger for updated_at
+    create_updated_at_trigger(conn, "stocks_portfolio")
 
 
 def create_groww_mutual_funds_portfolio_table(conn):
@@ -153,6 +251,9 @@ def create_groww_mutual_funds_portfolio_table(conn):
     
     cursor.execute(create_table_query)
     logger.info("Created table 'groww_mutual_funds_portfolio'")
+    
+    # Create trigger for updated_at
+    create_updated_at_trigger(conn, "groww_mutual_funds_portfolio")
 
 
 def create_mutual_fund_stock_details_table(conn):
@@ -192,6 +293,9 @@ def create_mutual_fund_stock_details_table(conn):
     
     cursor.execute(create_table_query)
     logger.info("Created table 'mutual_fund_stock_details'")
+    
+    # Create trigger for updated_at
+    create_updated_at_trigger(conn, "mutual_fund_stock_details")
 
 
 def insert_stocks_portfolio_data(conn, records: List[Dict]):
@@ -207,20 +311,18 @@ def insert_stocks_portfolio_data(conn, records: List[Dict]):
     
     insert_query = """
     INSERT INTO stocks_portfolio (
-        "Symbol", "ISIN", "Quantity", "Buy Value", "Sell Value",
-        "Realized P&L", "Realized P&L Pct.", "Previous Closing Price"
+        "Symbol", "ISIN", "Quantity", "Average Price",
+        "Unrealized P&L", "Unrealized P&L Pct."
     ) VALUES (
-        %(Symbol)s, %(ISIN)s, %(Quantity)s, %(Buy Value)s, %(Sell Value)s,
-        %(Realized P&L)s, %(Realized P&L Pct.)s, %(Previous Closing Price)s
+        %(Symbol)s, %(ISIN)s, %(Quantity)s, %(Average Price)s,
+        %(Unrealized P&L)s, %(Unrealized P&L Pct.)s
     )
     ON CONFLICT ("Symbol") DO UPDATE SET
         "ISIN" = EXCLUDED."ISIN",
         "Quantity" = EXCLUDED."Quantity",
-        "Buy Value" = EXCLUDED."Buy Value",
-        "Sell Value" = EXCLUDED."Sell Value",
-        "Realized P&L" = EXCLUDED."Realized P&L",
-        "Realized P&L Pct." = EXCLUDED."Realized P&L Pct.",
-        "Previous Closing Price" = EXCLUDED."Previous Closing Price",
+        "Average Price" = EXCLUDED."Average Price",
+        "Unrealized P&L" = EXCLUDED."Unrealized P&L",
+        "Unrealized P&L Pct." = EXCLUDED."Unrealized P&L Pct.",
         updated_at = NOW();
     """
     

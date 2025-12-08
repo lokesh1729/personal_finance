@@ -510,4 +510,7 @@ VALUES ('2025-11-25', 'Cash', 'Debit', 700, 'Misc', '#13084#', 'rupa metal thing
 
 
 
+CREATE TRIGGER set_timestamp
+BEFORE UPDATE ON public.hdfc_diners_club_privilege_credit_card
+FOR EACH ROW EXECUTE FUNCTION trigger_set_timestamp();
 
