@@ -4,7 +4,9 @@ import datetime
 import mimetypes
 import functools
 import re
-from typing import Dict
+from typing import Dict, Optional
+
+import pandas as pd
 
 
 def parse_str_to_float(in_val):
@@ -13,6 +15,38 @@ def parse_str_to_float(in_val):
     if not in_val:
         return 0.0
     return float("".join(in_val.strip().split(",")))
+
+
+def safe_float(value) -> Optional[float]:
+    """
+    Safely convert a value to float.
+    Handles None, NaN, and strings with '%' symbol.
+    
+    Args:
+        value: Value to convert (can be string, number, None, or NaN)
+        
+    Returns:
+        Float value or None if conversion fails
+    """
+    if value is None:
+        return None
+    
+    if pd.isna(value):
+        return None
+    
+    try:
+        # Convert to string and clean up
+        str_value = str(value).strip()
+        
+        # Remove '%' symbol if present
+        str_value = str_value.replace('%', '')
+        
+        # Remove commas (for formatted numbers like "1,234.56")
+        str_value = str_value.replace(',', '')
+        
+        return float(str_value)
+    except (ValueError, TypeError):
+        return None
 
 
 def auto_detect_category(description):
