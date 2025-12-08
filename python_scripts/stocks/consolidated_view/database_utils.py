@@ -146,7 +146,9 @@ def create_updated_at_trigger(conn, table_name: str):
         # Ensure the trigger function exists
         ensure_trigger_function_exists(conn)
         
-        trigger_name = f"set_timestamp_{table_name}"
+        # PostgreSQL folds unquoted identifiers to lowercase, so we lowercase the trigger name
+        # to ensure the existence check matches what's stored in pg_trigger.tgname
+        trigger_name = f"set_timestamp_{table_name}".lower()
         
         # Check if trigger already exists
         cursor.execute("""
