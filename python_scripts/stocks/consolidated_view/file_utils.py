@@ -48,14 +48,17 @@ def remove_empty_rows(df: pd.DataFrame) -> pd.DataFrame:
 
 def find_header_row(df: pd.DataFrame, expected_headers: List[str]) -> Optional[int]:
     """
-    Find the row index where the expected headers are found.
+    Find the row index where the expected headers are found (case-insensitive).
     Returns None if headers are not found.
     """
+    # Convert expected headers to lowercase for case-insensitive comparison
+    expected_headers_lower = [h.lower() for h in expected_headers]
+    
     for idx, row in df.iterrows():
-        # Check if all expected headers are present in this row (case-insensitive)
-        row_values = [str(val).strip() if pd.notna(val) else "" for val in row.values]
-        found_headers = [h for h in expected_headers if h in row_values]
-        if len(found_headers) >= len(expected_headers):
+        # Convert row values to lowercase for case-insensitive comparison
+        row_values_lower = [str(val).strip().lower() if pd.notna(val) else "" for val in row.values]
+        found_headers = [h for h in expected_headers_lower if h in row_values_lower]
+        if len(found_headers) >= len(expected_headers_lower):
             return idx
     
     return None

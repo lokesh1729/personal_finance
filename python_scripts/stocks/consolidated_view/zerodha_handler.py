@@ -1,6 +1,8 @@
 """
 Zerodha-specific handler for processing stock holdings.
 """
+import os
+import sys
 import pandas as pd
 from typing import List, Dict, Optional
 from .file_utils import (
@@ -9,6 +11,14 @@ from .file_utils import (
     remove_empty_rows,
     find_header_row
 )
+
+# Add python_scripts to path for imports
+script_dir = os.path.dirname(os.path.abspath(__file__))
+python_scripts_dir = os.path.dirname(os.path.dirname(script_dir))
+if python_scripts_dir not in sys.path:
+    sys.path.insert(0, python_scripts_dir)
+
+from common.utils import safe_float
 
 
 def process_stock_holdings_file(file_path: str) -> List[Dict]:
@@ -58,14 +68,14 @@ def process_stock_holdings_file(file_path: str) -> List[Dict]:
         # Extract quantity (use Quantity Available if available, otherwise sum of quantities)
         quantity = 0.0
         if "Quantity Available" in row and pd.notna(row.get("Quantity Available")):
-            quantity = float(row["Quantity Available"])
+            quantity = safe_float(row["Quantity Available"]) or 0.0
         elif "Quantity" in row and pd.notna(row["Quantity"]):
-            quantity = float(row["Quantity"])
+            quantity = safe_float(row["Quantity"]) or 0.0
         
         # Calculate Buy Value (Average Price * Quantity)
         buy_value = 0.0
         if "Average Price" in row and pd.notna(row["Average Price"]):
-            avg_price = float(row["Average Price"])
+            avg_price = safe_float(row["Average Price"]) or 0.0
             buy_value = avg_price * quantity
         
         # Extract ISIN - handle both "ISIN" and "ISINSector" columns
@@ -87,7 +97,7 @@ def process_stock_holdings_file(file_path: str) -> List[Dict]:
             "Sell Value": None,  # Not available in input
             "Realized P&L": None,  # Not available in input
             "Realized P&L Pct.": None,  # Not available in input
-            "Previous Closing Price": float(row["Previous Closing Price"]) if "Previous Closing Price" in row and pd.notna(row["Previous Closing Price"]) else None
+            "Previous Closing Price": safe_float(row["Previous Closing Price"]) if "Previous Closing Price" in row else None
         }
         records.append(record)
     
