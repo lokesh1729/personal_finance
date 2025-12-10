@@ -53,8 +53,14 @@ def create_df(each_filename):
             date_time_str = date_time_str.replace("|", " ").strip()
             date_time_str = re.sub(r'\s+', ' ', date_time_str)
             
+            # Extract date and time using regex pattern dd/mm/yyyy HH:MM
+            datetime_match = re.search(r'\d{2}/\d{2}/\d{4}\s+\d{2}:\d{2}', date_time_str)
+            if not datetime_match:
+                logger.error(f"Could not extract datetime from: {date_time_str}")
+                continue
+            
             try:
-                formatted_date = convert_date_format(date_time_str, "%d/%m/%Y %H:%M", "%Y-%m-%d %H:%M")
+                formatted_date = convert_date_format(datetime_match.group(), "%d/%m/%Y %H:%M", "%Y-%m-%d %H:%M")
             except Exception as e:
                 logger.error(f"Could not convert date format for: {date_time_str}, error: {e}")
                 continue

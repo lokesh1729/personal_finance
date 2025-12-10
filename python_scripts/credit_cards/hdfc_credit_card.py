@@ -62,9 +62,15 @@ def create_df(each_filename):
             # Remove extra spaces
             date_time_str = re.sub(r'\s+', ' ', date_time_str)
             
+            # Extract date using regex pattern dd/mm/yyyy
+            date_match = re.search(r'\d{2}/\d{2}/\d{4}', date_time_str)
+            if not date_match:
+                logger.error(f"Could not extract date from: {date_time_str}")
+                continue
+            
             try:
-                # Parse date in format "dd/mm/yyyy hh:mm"
-                formatted_date = convert_date_format(date_time_str, "%d/%m/%Y %H:%M", "%Y-%m-%d %H:%M")
+                # Parse extracted date in format "dd/mm/yyyy"
+                formatted_date = convert_date_format(date_match.group(), "%d/%m/%Y", "%Y-%m-%d")
             except Exception as e:
                 logger.error(f"Could not convert date format for: {date_time_str}, error: {e}")
                 continue
@@ -136,11 +142,16 @@ def create_df(each_filename):
 
 def hdfc_credit_card_processor(filename, output):
     # Read already-normalized CSV produced by create_df (Date, Description, Rewards, Amount, Debit / Credit)
-    
-    df = pd.read_csv(
-        filename,
-        usecols=["Date", "Description", "Amount", "Debit / Credit"],
-    )
+
+    try:
+        df = pd.read_csv(
+            filename,
+            usecols=["Date", "Description", "Rewards", "Amount", "Debit / Credit"],
+        )
+    except Exception:
+        df = create_df(filename)
+    if df.empty:
+        df = create_df(filename)
 
     result = []
     for _, row in df.iterrows():
@@ -176,7 +187,7 @@ def hdfc_credit_card_adapter(filename, output):
         hdfc_credit_card_processor(filename, output)
     elif check_file_type(filename) == "PDF":
         unlock_pdf(filename, "HDFC_CREDIT_CARD_PASSWORD")
-        for each_filename in extract_tables_from_pdf(filename, [692, 161, 692+129, 162+405], [262, 18, 262+248, 18+542], "stream"):
+        for each_filename in extract_tables_from_pdf(filename, [702, 161, 692+129, 162+405], [262, 18, 262+248, 18+542], "stream"):
             try:
                 create_df(each_filename)
             except Exception:

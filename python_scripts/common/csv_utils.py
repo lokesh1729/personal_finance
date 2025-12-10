@@ -206,6 +206,15 @@ def has_headers(output):
 
 
 def write_result(out_filename, result, headers=None, append=False):
+    """
+    Write result rows to a CSV file.
+    
+    Args:
+        out_filename: Output file path
+        result: List of dictionaries to write
+        headers: List of column headers (defaults to standard transaction columns)
+        append: If True, append to existing file; if False, overwrite
+    """
     if headers is None:
         output_columns = [
             "txn_date",
@@ -218,10 +227,18 @@ def write_result(out_filename, result, headers=None, append=False):
         ]
     else:
         output_columns = headers
-    headers_exist = has_headers(out_filename)
+    
+    # Determine if we need to write headers
+    if append:
+        # When appending, only write headers if file doesn't have them
+        should_write_headers = not has_headers(out_filename)
+    else:
+        # When overwriting, always write headers since file will be truncated
+        should_write_headers = True
+    
     with open(out_filename, "a+" if append else "w") as csvfile:
         writer = csv.DictWriter(csvfile, fieldnames=output_columns)
-        if not headers_exist:
+        if should_write_headers:
             writer.writeheader()
         for each_row in result:
             writer.writerow(each_row)
