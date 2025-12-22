@@ -108,7 +108,7 @@ KpnFarmFreshPvtLtd,Groceries,#KPNFresh,
 KPN FF,Groceries,#KPNFresh,
 SWIGGY.STORES,Groceries,#SwiggyInstamart,
 swiggy instamart,Groceries,#SwiggyInstamart,
-FRESHALICIOUS,Groceries,#FthDaily
+FRESHALICIOUS,Groceries,#FthDaily,
 health,Health,,
 tablet,Health,,
 medicine,Health,,
@@ -151,6 +151,7 @@ bharatpe,Misc,,
 cashmycar,Misc,,olx
 parking,Misc,,
 joining fee,Misc,,credit card joining fee
+annual fee,Misc,,annual fee
 emergency fund,Others,#MonthlyBuffer,short term - monthly buffer & emergency fund
 house goal,Others,#MonthlyBuffer,
 AMAZONPAYBALANCELOAD,Others,#AmazonPayWalletReload,amazon pay wallet reload

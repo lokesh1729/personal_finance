@@ -71,14 +71,13 @@ def create_df(each_filename):
             
             neucoins_str = str(row.get("Base NeuCoins*", "")).strip()
             neucoins_value = 0.0
-            if neucoins_str and neucoins_str.lower() != "nan":
-                neucoins_clean = neucoins_str.replace(',', '')
-                neucoins_clean = re.sub(r'^([+-])\s+', r'\1', neucoins_clean)
-                try:
-                    neucoins_value = float(neucoins_clean)
-                except ValueError as e:
-                    logger.error(f"Could not convert neucoins to float: {neucoins_str}, error: {e}")
-                    continue
+            neucoins_clean = neucoins_str.replace(',', '')
+            neucoins_clean = re.sub(r'^([+-])\s+', r'', neucoins_clean)
+            try:
+                neucoins_value = float(neucoins_clean)
+            except ValueError as e:
+                logger.error(f"Could not convert neucoins to float: {neucoins_str}, error: {e}")
+                continue
             
             amount_str = str(row.get("AMOUNT", "")).strip()
             if not amount_str or amount_str.lower() == "nan":
@@ -112,7 +111,7 @@ def create_df(each_filename):
     
     new_df = pd.DataFrame(
         processed_rows,
-        columns=["Date", "Description", "Base NeuCoins*", "Amount", "Debit / Credit"],
+        columns=["Date", "Description", "NeuCoins", "Amount", "Debit / Credit"],
     )
     
     temp_file_name, _ = os.path.splitext(each_filename)
@@ -165,7 +164,7 @@ def hdfc_tata_neu_credit_card_adapter(filename, output):
         for each_filename in extract_tables_from_pdf(
             filename,
             [744, 162, 728 + 72, 162 + 400],
-            [262, 18, 262 + 170, 18 + 540],
+            [262, 18, 262 + 369, 18 + 540],
             "stream",
         ):
             try:
