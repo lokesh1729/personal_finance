@@ -57,6 +57,11 @@ def main():
     mb_pass = os.getenv("MB_DB_PASSWORD")
     mb_name = "metabase"
 
+    # PFM DB details
+    pfm_user = os.getenv("PFM_DB_USERNAME")
+    pfm_pass = os.getenv("PFM_DB_PASSWORD")
+    pfm_name = "pfm"
+
     # Backup personal_finance DB: public and dropshipping schemas
     for schema in ["public", "dropshipping"]:
         backup_database(
@@ -75,6 +80,16 @@ def main():
         db_user=mb_user,
         db_password=mb_pass,
         db_name=mb_name,
+        schema_name="public"
+    )
+
+    # Backup pfm DB: public schema only
+    backup_database(
+        db_host=pf_host,  # assuming same host and port
+        db_port=pf_port,
+        db_user=pfm_user,
+        db_password=pfm_pass,
+        db_name=pfm_name,
         schema_name="public"
     )
 
