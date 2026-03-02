@@ -10,13 +10,14 @@ load_dotenv()
 
 # Global path to pg_dump
 PG_DUMP_PATH = "/Users/Shared/DBngin/postgresql/15.1/bin/pg_dump"
+BACKUP_DIR = "/Users/lokeshsanapalli/Library/CloudStorage/Dropbox/Backups"
 
 def backup_database(
     db_host, db_port, db_user, db_password,
-    db_name, schema_name
+    db_name, schema_name, output_basename
 ):
     timestamp = datetime.now().strftime("%Y_%m_%d_%H_%M")
-    backup_filename = f"dump_{db_name}_{schema_name}_{timestamp}.tar"
+    backup_filename = os.path.join(BACKUP_DIR, f"{output_basename}_{timestamp}.tar")
 
     dump_cmd = [
         PG_DUMP_PATH,
@@ -45,12 +46,8 @@ def backup_database(
 
 
 def main():
-    # Personal Finance DB details
-    pf_host = os.getenv("DB_HOST")
-    pf_port = os.getenv("DB_PORT")
-    pf_user = os.getenv("PF_DB_USERNAME")
-    pf_pass = os.getenv("PF_DB_PASSWORD")
-    pf_name = "personal_finance"
+    db_host = os.getenv("DB_HOST")
+    db_port = os.getenv("DB_PORT")
 
     # Metabase DB details
     mb_user = os.getenv("MB_DB_USERNAME")
@@ -62,35 +59,26 @@ def main():
     pfm_pass = os.getenv("PFM_DB_PASSWORD")
     pfm_name = "pfm"
 
-    # Backup personal_finance DB: public and dropshipping schemas
-    for schema in ["public", "dropshipping"]:
-        backup_database(
-            db_host=pf_host,
-            db_port=pf_port,
-            db_user=pf_user,
-            db_password=pf_pass,
-            db_name=pf_name,
-            schema_name=schema
-        )
-
     # Backup metabase DB: public schema only
     backup_database(
-        db_host=pf_host,  # assuming same host and port
-        db_port=pf_port,
+        db_host=db_host,
+        db_port=db_port,
         db_user=mb_user,
         db_password=mb_pass,
         db_name=mb_name,
-        schema_name="public"
+        schema_name="public",
+        output_basename="dump_metabase"
     )
 
     # Backup pfm DB: public schema only
     backup_database(
-        db_host=pf_host,  # assuming same host and port
-        db_port=pf_port,
+        db_host=db_host,
+        db_port=db_port,
         db_user=pfm_user,
         db_password=pfm_pass,
         db_name=pfm_name,
-        schema_name="public"
+        schema_name="public",
+        output_basename="dump_pfm"
     )
 
 if __name__ == "__main__":
