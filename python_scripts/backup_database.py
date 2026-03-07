@@ -2,7 +2,6 @@ import os
 import subprocess
 import gzip
 import shutil
-from datetime import datetime
 from dotenv import load_dotenv
 
 # Load environment variables from .env (optional)
@@ -16,8 +15,7 @@ def backup_database(
     db_host, db_port, db_user, db_password,
     db_name, schema_name, output_basename
 ):
-    timestamp = datetime.now().strftime("%Y_%m_%d_%H_%M")
-    backup_filename = os.path.join(BACKUP_DIR, f"{output_basename}_{timestamp}.tar")
+    backup_filename = os.path.join(BACKUP_DIR, f"{output_basename}.tar")
 
     dump_cmd = [
         PG_DUMP_PATH,
